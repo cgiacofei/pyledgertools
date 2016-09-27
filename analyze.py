@@ -62,5 +62,5 @@ context['weekly_fixed'] = weekly_fixed
 context['weekly_flex'] = weekly_flex
 context['weekly_save'] = weekly_save
 
-result = render('templates/base.html', context)
+result = render('templates/report.html', context)
 print(result)
