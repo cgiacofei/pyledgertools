@@ -1,0 +1,161 @@
+Rule:
+  Name: Mortgage
+  Conditions:
+    DESC CONTAINS "VIRGINIA HOUSING"
+  Allocations:
+    "Expenses:Fixed:Mortgage" 100%
+
+Rule:
+  Name: Daycare
+  Conditions:
+   i AMOUNT EQUALS -320.00
+    DESC CONTAINS "CHECK"
+  Allocations:
+    "Expenses:Fixed:DayCare" 100%
+
+
+Rule:
+  Name: VerizonPhone
+  Conditions:
+    DESC CONTAINS "VERIZON WIRELESS"
+  Allocations:
+    "Expenses:Fixed:CellPhone:Verizon" 100%
+
+Rule:
+  Name: TrashPickup
+  Conditions:
+    DESC CONTAINS "COUNTY WASTE"
+  Allocations:
+    "Expenses:Fixed:Trash Pickup" 100%
+
+Rule:
+  Name: DiscoverLoan
+  Conditions:
+    DESC CONTAINS "DSLCPYMNTS"
+  Allocations:
+    "Expenses:Fixed:StudentLoan:Discover" 100%
+
+Rule:
+  Name: FederalLoan
+  Conditions:
+    DESC CONTAINS "DEPT EDUCATION"
+  Allocations:
+    "Expenses:Fixed:StudentLoan:Federal Direct" 100%
+
+Rule:
+  Name: CitiLoan
+  Conditions:
+    DESC CONTAINS "SLPAYMENTS"
+  Allocations:
+    "Expenses:Fixed:StudentLoan:Citi Assist" 100%
+
+Rule:
+  Name: CreditValueCity
+  Conditions:
+    DESC CONTAINS "SYNCHRONY BANK"
+    AMOUNT > 80
+  Allocations:
+    "Expenses:Fixed:Credit:Synchrony:Value City" 100%
+
+Rule:
+  Name: CreditCareCredit
+  Conditions:
+    DESC CONTAINS "SYNCHRONY BANK"
+    AMOUNT < 80
+  Allocations:
+    "Expenses:Fixed:Credit:Synchrony:Care Credit" 100%
+
+Rule:
+  Name: CreditAmex
+  Conditions:
+    DESC CONTAINS "AMEX EPAYMENT"
+  Allocations:
+    "Expenses:Fixed:Credit:Amex" 100%
+
+Rule:
+  Name: CreditTarget
+  Conditions:
+    DESC CONTAINS "TARGET CARD"
+  Allocations:
+    "Expenses:Fixed:Credit:Target" 100%
+
+Rule:
+  Name: CreditAmazon
+  Conditions:
+    DESC CONTAINS "CHASE"
+    DESC CONTAINS "AUTOPAY"
+  Allocations:
+    "Expenses:Fixed:Credit:Amazon" 100%
+
+Rule:
+  Name: CreditKohls
+  Conditions:
+    DESC CONTAINS "KOHLS PYMT"
+  Allocations:
+    "Expenses:Fixed:Credit:Kohls" 100%
+
+Rule:
+  Name: Internet
+  Conditions:
+    DESC CONTAINS "VERIZON"
+    DESC CONTAINS "PAYMENTREC"
+  Allocations:
+    "Expenses:Fixed:Internet" 100%
+
+Rule:
+  Name: Netflix
+  Conditions:
+    DESC CONTAINS "NETFLIX"
+
+  Allocations:
+    "Expenses:Fixed:Netflix" 100%
+
+Rule:
+  Name: InsuranceTrailer
+  Conditions:
+    DESC CONTAINS "????"
+  Allocations:
+    "Expenses:Fixed:Insurance:Trailer" 100%
+
+Rule:
+  Name: InsuranceLiberty
+  Conditions:
+    DESC CONTAINS "LIBERTY MUTUAL"
+  Allocations:
+    "Expenses:Fixed:Insurance:Liberty Mutual" 100%
+
+Rule:
+  Name: WeeklyFixed
+  Conditions:
+    DESC CONTAINS "CAPITALONE"
+  Allocations:
+    "Transfer:Weekly" 100%
+
+Rule:
+  Name:  ONLINE BANKING TRANSFER TO 0175
+  Conditions:
+    DESC EQUALS " ONLINE BANKING TRANSFER TO 0175"
+  Allocations:
+    "Expenses:Fixed:Credit:Suntrust" 100%
+
+Rule:
+  Name: CHECK
+  Conditions:
+    DESC EQUALS "CHECK"
+  Allocations:
+    "UNKNOWN:Unknown" 100%
+
+Rule:
+  Name: DEPOSIT
+  Conditions:
+    DESC EQUALS "DEPOSIT"
+  Allocations:
+    "Banks:CapOne:Checking" 100%
+
+Rule:
+  Name: MOBILE CHECK DEPOSIT
+  Conditions:
+    DESC EQUALS "MOBILE CHECK DEPOSIT"
+  Allocations:
+    "UNKNOWN:Unknown" 100%
+

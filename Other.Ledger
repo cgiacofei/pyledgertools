@@ -1,0 +1,210 @@
+2017-01-03	 AMEX EPAYMENT    ACH PMT    A83
+	Banks:Suntrust:Checking	-$40.00
+	Expenses:Fixed:Credit:Amex	$40.00
+
+2017-01-04	 CAPITAL ONE N.A. CAPITALONE  
+	Banks:Suntrust:Checking	-$0.00
+	Transfer:Weekly	$0.00
+
+2017-01-04	CHECK
+	Banks:Suntrust:Checking	-$160.00
+	Expenses:Fixed:DayCare	$160.00
+
+2017-01-04	 VIRGINIA HOUSING MSP        198
+	Banks:Suntrust:Checking	-$1074.23
+	Expenses:Fixed:Mortgage	$1074.23
+
+2017-01-05	 VERIZON          PAYMENTREC 554
+	Banks:Suntrust:Checking	-$74.64
+	Expenses:Fixed:Internet	$74.64
+
+2017-01-06	MOBILE CHECK DEPOSIT
+	Banks:Suntrust:Checking	-$0.00
+	Expenses:Fixed:DayCare	$0.00
+
+2017-01-09	 VERIZON WIRELESS PAYMENTS   042
+	Banks:Suntrust:Checking	-$99.66
+	Expenses:Fixed:CellPhone:Verizon	$99.66
+
+2017-01-09	CHECK
+	Banks:Suntrust:Checking	-$275.00
+	Expenses:Fixed:DayCare	$275.00
+
+2017-01-10	 CAPITAL ONE N.A. CAPITALONE  
+	Banks:Suntrust:Checking	-$0.00
+	Transfer:Weekly	$0.00
+
+2017-01-11	DEPOSIT
+	Banks:Suntrust:Checking	-$0.00
+	UNKNOWN:Unknown	$0.00
+
+2017-01-13	CHECK
+	Banks:Suntrust:Checking	-$320.00
+	Expenses:Fixed:DayCare	$320.00
+
+2017-01-17	 ONLINE BANKING TRANSFER TO 0175
+	Banks:Suntrust:Checking	-$32.00
+	Expenses:Fixed:Credit:Suntrust           $32.00
+
+2017-01-17	 KOHLS PYMT CTR   KOHLS CRDT 043
+	Banks:Suntrust:Checking	-$41.00
+	Expenses:Fixed:Credit:Kohls	$41.00
+
+2017-01-17	 CHASE            AUTOPAY    000
+	Banks:Suntrust:Checking	-$44.00
+	Expenses:Fixed:Credit:Amazon	$44.00
+
+2017-01-17	 DEPT EDUCATION   STUDENT LN 000
+	Banks:Suntrust:Checking	-$135.93
+	Expenses:Fixed:StudentLoan:Federal Direct	$135.93
+
+2017-01-18	 CAPITAL ONE N.A. CAPITALONE  
+	Banks:Suntrust:Checking	-$0.00
+	Transfer:Weekly	$0.00
+
+2017-01-18	 LIBERTY MUTUAL   PAYMENT    AO5
+	Banks:Suntrust:Checking	-$117.42
+	Expenses:Fixed:Insurance:Liberty Mutual	$117.42
+
+2017-01-18	 CAPITAL ONE N.A. CAPITALONE 000
+	Banks:Suntrust:Checking	-$200.00
+	Transfer:Weekly	$200.00
+
+
+2017-01-19	 COUNTY WASTE               804-
+	Banks:Suntrust:Checking	-$19.50
+	Expenses:Fixed:Trash Pickup	$19.50
+
+2017-01-23	 DOMINION VAPOWER ELEC BILL  504
+	Banks:Suntrust:Checking	-$8.40
+        Expenses:Fixed:Electric:River
+
+
+2017-01-23	 SYNCHRONY BANK   PAYMENT    601
+	Banks:Suntrust:Checking	-$81.00
+	Expenses:Fixed:Credit:Synchrony:Care Credit	$81.00
+
+2017-01-24	 CAPITAL ONE N.A. CAPITALONE  
+	Banks:Suntrust:Checking	-$0.00
+	Transfer:Weekly	$0.00
+
+2017-01-25	 TARGET CARD SRVC AUTO PYMT  777
+	Banks:Suntrust:Checking	-$41.00
+	Expenses:Fixed:Credit:Target	$41.00
+
+2017-01-25	 CITIBANKN.A.    SLPAYMENTS 500
+	Banks:Suntrust:Checking	-$66.31
+	Expenses:Fixed:StudentLoan:Citi Assist	$66.31
+
+2017-01-25	CHECK
+	Banks:Suntrust:Checking	-$320.00
+	Expenses:Fixed:DayCare	$320.00
+
+2017-01-25	 THE STUDENT LOAN DSLCPYMNTS 500
+	Banks:Suntrust:Checking	-$451.77
+	Expenses:Fixed:StudentLoan:Discover	$451.77
+
+2017-01-31	 CAPITAL ONE N.A. CAPITALONE  
+	Banks:Suntrust:Checking	-$0.00
+	Transfer:Weekly	$0.00
+
+2017-02-02	CHECK
+	Banks:Suntrust:Checking	-$28.67
+	Expenses:Fixed:DayCare	$28.67
+
+2017-02-03	 AMEX EPAYMENT    ACH PMT    A93
+	Banks:Suntrust:Checking	-$80.00
+	Expenses:Fixed:Credit:Amex	$80.00
+
+2017-02-06	 VERIZON          PAYMENTREC 554
+	Banks:Suntrust:Checking	-$74.64
+	Expenses:Fixed:Internet	$74.64
+
+2017-02-06	CHECK
+	Banks:Suntrust:Checking	-$275.00
+	Expenses:Fixed:DayCare	$275.00
+
+2017-02-06	 VIRGINIA HOUSING MSP        198
+	Banks:Suntrust:Checking	-$1074.23
+	Expenses:Fixed:Mortgage	$1074.23
+
+2017-02-07	 CAPITAL ONE N.A. CAPITALONE  
+	Banks:Suntrust:Checking	-$0.00
+	Transfer:Weekly	$0.00
+
+2017-02-07	CHECK
+	Banks:Suntrust:Checking	-$320.00
+	Expenses:Fixed:DayCare	$320.00
+
+2017-02-08	 VERIZON WIRELESS PAYMENTS   042
+	Banks:Suntrust:Checking	-$75.90
+	Expenses:Fixed:CellPhone:Verizon	$75.90
+
+2017-02-13	DEPOSIT
+	Banks:Suntrust:Checking	-$0.00
+	UNKNOWN:Unknown	$0.00
+
+2017-02-14	 CAPITAL ONE N.A. CAPITALONE  
+	Banks:Suntrust:Checking	-$0.00
+	Transfer:Weekly	$0.00
+
+2017-02-14	 ONLINE BANKING TRANSFER TO 0175
+	Banks:Suntrust:Checking	-$34.00
+	Expenses:Fixed:Credit:Suntrust          $34.00
+
+2017-02-14	 DEPT EDUCATION   STUDENT LN 000
+	Banks:Suntrust:Checking	-$135.93
+	Expenses:Fixed:StudentLoan:Federal Direct	$135.93
+
+2017-02-15	 SYNCHRONY BANK   PAYMENT    601
+	Banks:Suntrust:Checking	-$25.00
+	Expenses:Fixed:Credit:Synchrony:Care Credit	$25.00
+
+2017-02-15	 CAPITAL ONE N.A. CAPITALONE 000
+	Banks:Suntrust:Checking	-$350.00
+	Transfer:Weekly	$350.00
+
+2017-02-16	 CHASE            AUTOPAY    000
+	Banks:Suntrust:Checking	-$45.00
+	Expenses:Fixed:Credit:Amazon	$45.00
+
+2017-02-17	 KOHLS PYMT CTR   KOHLS CRDT 043
+	Banks:Suntrust:Checking	-$40.00
+	Expenses:Fixed:Credit:Kohls	$40.00
+
+2017-02-17	 LIBERTY MUTUAL   PAYMENT    AO5
+	Banks:Suntrust:Checking	-$117.42
+	Expenses:Fixed:Insurance:Liberty Mutual	$117.42
+
+2017-02-21	 DOMINION VAPOWER ELEC BILL  504
+	Banks:Suntrust:Checking	-$8.51
+        Expenses:Fixed:Electric:River
+
+2017-02-21	 COUNTY WASTE               804-
+	Banks:Suntrust:Checking	-$19.50
+	Expenses:Fixed:Trash Pickup	$19.50
+
+2017-02-22	 CAPITAL ONE N.A. CAPITALONE  
+	Banks:Suntrust:Checking	-$0.00
+	Transfer:Weekly	$0.00
+
+2017-02-22	CHECK
+	Banks:Suntrust:Checking	-$224.00
+	Expenses:Fixed:DayCare	$224.00
+
+2017-02-23	 SYNCHRONY BANK   PAYMENT    601
+	Banks:Suntrust:Checking	-$81.00
+	Expenses:Fixed:Credit:Synchrony:Value City	$81.00
+
+2017-02-27	 TARGET CARD SRVC AUTO PYMT  777
+	Banks:Suntrust:Checking	-$41.00
+	Expenses:Fixed:Credit:Target	$41.00
+
+2017-02-27	 CITIBANKN.A.    SLPAYMENTS 500
+	Banks:Suntrust:Checking	-$66.31
+	Expenses:Fixed:StudentLoan:Citi Assist	$66.31
+
+2017-02-27	 THE STUDENT LOAN DSLCPYMNTS 500
+	Banks:Suntrust:Checking	-$451.77
+	Expenses:Fixed:StudentLoan:Discover	$451.77
+
