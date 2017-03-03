@@ -1,3 +1,7 @@
+# Bank Files
+*.ofx
+*.qfx
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -20,6 +24,7 @@ lib64/
 parts/
 sdist/
 var/
+wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -66,7 +71,7 @@ docs/_build/
 # PyBuilder
 target/
 
-# IPython Notebook
+# Jupyter Notebook
 .ipynb_checkpoints
 
 # pyenv
@@ -75,14 +80,18 @@ target/
 # celery beat schedule file
 celerybeat-schedule
 
-# dotenv
-.env
+# SageMath parsed files
+*.sage.py
 
 # virtualenv
 .venv/
+.env/
 venv/
 env/
 
-# Project Stuff
-*.ofx
+# Spyder project settings
+.spyderproject
+
+# Rope project settings
+.ropeproject
 index.html
