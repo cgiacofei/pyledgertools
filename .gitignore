@@ -89,6 +89,11 @@ celerybeat-schedule
 venv/
 env/
 
+# Tag files
+tags
+tags.temp
+tags.lock
+
 # Spyder project settings
 .spyderproject
 
