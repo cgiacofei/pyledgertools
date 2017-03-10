@@ -104,7 +104,7 @@ class Allocation():
             amt = '= {} {:.2f}'.format(self.currency, self.amount)
         else:
             amt = '{} {:.2f}'.format(self.currency, self.amount)
-        
+
         fill = ' ' * (width - len(acct + amt + ind))
 
         outlist = []
@@ -131,6 +131,7 @@ class Transaction():
         self.allocations = kwargs.get('allocations', [])
         self.bankid = kwargs.get('bankid', None)
         self.acctid = kwargs.get('acctid', None)
+        self.account = kwargs.get('account', '')
 
     def to_string(self, width=80, indent=4):
         """Transaction to string."""
@@ -160,11 +161,11 @@ class Transaction():
 
 def build_journal(ofx_file, config_accts):
     """Accept an ofx file and parse into list of Tansaction objects."""
-    
+
     tree = OFXTree()
     tree.parse(ofx_file)
     ofx_obj = tree.convert()
-     
+
     balance_assertions = []
     transactions = []
 
@@ -192,7 +193,7 @@ def build_journal(ofx_file, config_accts):
         )
 
         balance_assertions.append(t_assert)
-        
+
         for transaction in statement.transactions:
             meta = []
 
@@ -220,14 +221,14 @@ def build_journal(ofx_file, config_accts):
                 date = trn_date,
                 payee = payee,
                 allocations = [a_tran],
-                metadata = meta
+                metadata = meta,
+                account = account
             )
 
             # Need to process transactions further here
             # Either rules or Bayesian...
 
             transactions.append(t_tran)
-    
 
     return balance_assertions, transactions
 
@@ -240,92 +241,46 @@ def find_in_config(config_list, key, value):
             return item
 
 
-def process_ofx(config_accounts, ofx_file=None):
-    if ofx_file:
-        with open(ofx_file, 'r') as ofx_file:
-            ofx = OfxParser.parse(ofx_file)
-    else:
-        # Run OFX download
-        call(['ofxclient', '--download', 'banks.ofx'])
-        with open('banks.ofx', 'r') as ofx_file:
-            ofx = OfxParser.parse(ofx_file)
+def export_journal(balances, transactions, **kwargs):
+    """Send journal to files/screen.
 
-    # Parse the file into a dictionary object
-    parsed_accounts = parse_ofx(ofx)
+    Arguments:
+        balances:     List of balance assertion transactions.
+        transactions: List of transactions.
 
-    rule_dict = build_rules(options.rule_file)
+    Keyword Arguments
+        output:       String, where to print output. 'stdout' or 'file'.
+                      Defaults to 'stdout'.
+        by_account:   Boolean, true to split files by account or false to send
+                      all output to single file.
+        assert_file:  String, filename to send balance asertions to or `None`
+                      for no assertions
+    """
 
-    assert_list = []
-    for account in parsed_accounts.keys():
-        data = find_in_config(config_accounts, 'account_id', account)
+    output = kwargs.get('output', 'stdout')
+    by_account = kwargs.get('by_account', True)
+    assert_file = kwargs.get('assert_file', 'bal.ledger')
 
-        account_string = data['ledger_from']
-        default_account = data['ledger_to']
 
-        transactions = parsed_accounts[account]['trans']
-        for rule, trans_obj in check_transactions(transactions, rule_dict):
-            # Check additional tags in rule
-            try:
-                skip = rule_dict[rule]['Ignore']
-            except:
-                skip = False
 
-            try:
-                if rule_dict[rule]['Change_Payee'] == 'True':
-                    trans_obj['payee'] = rule
-            except KeyError:
-                if rule is not False:
-                    trans_obj['payee'] = rule
+    for transaction in transations:
+        if output = 'file':
+            out_file = transaction.account + '.ledger'
+        else
+            out_file = sys.stdout
 
-            outfile = os.path.join('dat','{}.ledger'.format(account))
-            if rule and not skip:
-                with open(outfile, 'a') as oFile:
-                    print('', file=oFile)
-                    print_transaction(
-                        trans_obj,
-                        rule_dict[rule],
-                        account_string,
-                        clr=True,
-                        outfile=oFile
-                    )
+        print(transaction.to_string()), file=out_file)
+        print('', file=out_file)
 
-            elif not skip:
-                payee = trans_obj['payee']
-                new_rule = make_rule(payee, default_account)
-                with open(outfile,'a') as oFile:
-                    print('', file=oFile)
-                    print_transaction(
-                        trans_obj,
-                        new_rule,
-                        account_string,
-                        clr=False,
-                        outfile=oFile
-                    )
+    if assert_file:
+        for balance in balances:
+            if output = 'file':
+                out_file = assert_file
+            else
+                out_file = sys.stdout
 
-                with open(outfile.replace('dat','un'), 'a') as oFile:
-                    print('', file=oFile)
-                    print_transaction(
-                        trans_obj,
-                        new_rule,
-                        account_string,
-                        clr=False,
-                        outfile=oFile
-                    )
-
-        balance = {
-            'amount': parsed_accounts[account]['balance'],
-            'payee': 'Balance Assertion',
-            'date': strftime(now(), '%Y-%m-%d')
-        }
-
-        with open(os.path.join('dat','Budget.ledger'), 'a') as oFile:
-            print('', file=oFile)
-            print_transaction(
-                balance,
-                None,
-                account_string,
-                outfile=oFile
-            )
+            print(balance.to_string()), file=out_file)
+            print('', file=out_file)
 
 
 def check_transactions(transaction, rules):
