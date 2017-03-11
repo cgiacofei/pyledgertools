@@ -4,14 +4,9 @@ from __future__ import print_function
 from datetime import datetime
 import hashlib
 from ofxtools import OFXTree
-from operator import itemgetter
 from optparse import OptionParser
 import os
-import re
-from subprocess import call, Popen, PIPE
 import sys
-import time
-import yaml
 from yaml import load
 
 from rule_parser import walk_rules, build_rules, make_rule
@@ -181,15 +176,15 @@ def build_journal(ofx_file, config_accts):
         acct_options = find_in_config(config_accts, 'account_id', account)
 
         a_assert = Allocation(
-            account = acct_options['ledger_from'],
-            amount = balance,
-            assertion = True
+            account=acct_options['ledger_from'],
+            amount=balance,
+            assertion=True
         )
 
         t_assert = Transaction(
-            date = stmnt_date,
-            payee = 'Balance for {}-{}'.format(ofx_obj.sonrs.org, account),
-            allocations = [a_assert]
+            date=stmnt_date,
+            payee='Balance for {}-{}'.format(ofx_obj.sonrs.org, account),
+            allocations=[a_assert]
         )
 
         balance_assertions.append(t_assert)
@@ -213,16 +208,16 @@ def build_journal(ofx_file, config_accts):
             meta.append(('md5', hash_obj.hexdigest()))
 
             a_tran = Allocation(
-                account = acct_options['ledger_from'],
-                amount = amount
+                account=acct_options['ledger_from'],
+                amount=amount
             )
 
             t_tran = Transaction(
-                date = trn_date,
-                payee = payee,
-                allocations = [a_tran],
-                metadata = meta,
-                account = account
+                date=trn_date,
+                payee=payee,
+                allocations=[a_tran],
+                metadata=meta,
+                account=account
             )
 
             # Need to process transactions further here
@@ -250,36 +245,36 @@ def export_journal(balances, transactions, **kwargs):
 
     Keyword Arguments
         output:       String, where to print output. 'stdout' or 'file'.
-                      Defaults to 'stdout'.
-        by_account:   Boolean, true to split files by account or false to send
-                      all output to single file.
+                      Defaults to 'stdout'. A value of file sends to a
+                      preconfigured filename derived from the account ID.
+                      Lastely can be a filename to add all transactions to.
         assert_file:  String, filename to send balance asertions to or `None`
                       for no assertions
     """
 
     output = kwargs.get('output', 'stdout')
-    by_account = kwargs.get('by_account', True)
     assert_file = kwargs.get('assert_file', 'bal.ledger')
 
-
-
-    for transaction in transations:
-        if output = 'file':
+    for transaction in transactions:
+        if output == 'file':
+            # Make this formattable?
             out_file = transaction.account + '.ledger'
-        else
+        elif output == 'stdout':
             out_file = sys.stdout
+        else:
+            out_file = output
 
-        print(transaction.to_string()), file=out_file)
+        print(transaction.to_string(), file=out_file)
         print('', file=out_file)
 
     if assert_file:
         for balance in balances:
-            if output = 'file':
+            if output == 'file':
                 out_file = assert_file
-            else
+            else:
                 out_file = sys.stdout
 
-            print(balance.to_string()), file=out_file)
+            print(balance.to_string(), file=out_file)
             print('', file=out_file)
 
 
