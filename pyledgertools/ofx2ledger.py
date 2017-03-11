@@ -4,59 +4,13 @@ from __future__ import print_function
 from datetime import datetime
 import hashlib
 from ofxtools import OFXTree
-from optparse import OptionParser
 import os
 import sys
-from yaml import load
 
 from pyledgertools.rule_parser import walk_rules, build_rules, make_rule
 
 now = datetime.now
 strftime = datetime.strftime
-
-parser = OptionParser()
-
-parser.add_option(
-    "-i", "--input-ofx",
-    dest="ofx_file",
-    default=None,
-    help=".OFX file to parse"
-)
-parser.add_option(
-    "-l", "--ledger-file",
-    dest="ledger_file",
-    default=None,
-    help="Ledger file to check transactions against."
-)
-parser.add_option(
-    "-c", "--config",
-    dest="config",
-    default=None,
-    help="config file for account names/numbers etc."
-)
-parser.add_option(
-    "-r", "--rules",
-    dest="rule_file",
-    default='rules.txt',
-    help="File or directory containing matching rules."
-)
-
-options = parser.parse_args()
-
-TRANSACTION = (
-    '{date}{c}{payee} {desc}'
-    '{md5hash}{allocations}{tags}'
-)
-
-ALLOC_STR = '\n{indent}{account}{space} {commodity} {amount:0.2f}'
-ASSERT_STR = '\n{indent}{account}{space} = {commodity} {amount:0.2f}'
-
-FIELDS = {
-    'PAYEE': 1,
-    'HASH': 3,
-    'AMOUNT': 2,
-    'DATE': 0,
-}
 
 
 class SafeDict(dict):
@@ -315,16 +269,3 @@ def check_transactions(transaction, rules):
                 break
 
         yield match, trans_dict
-
-
-if __name__ == "__main__":
-    if options.config:
-        c_path = options.config
-
-    else:
-        ROOT = os.path.dirname(os.path.realpath(__file__))
-        c_path = os.path.join(ROOT, 'ofx.conf')
-
-    config = load(open(c_path, 'r'))
-
-    build_journal(options.ofx_file, config['accounts'])
