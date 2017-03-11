@@ -9,7 +9,7 @@ import os
 import sys
 from yaml import load
 
-from rule_parser import walk_rules, build_rules, make_rule
+from pyledgertools.rule_parser import walk_rules, build_rules, make_rule
 
 now = datetime.now
 strftime = datetime.strftime
@@ -41,7 +41,7 @@ parser.add_option(
     help="File or directory containing matching rules."
 )
 
-(options, args) = parser.parse_args()
+options = parser.parse_args()
 
 TRANSACTION = (
     '{date}{c}{payee} {desc}'
