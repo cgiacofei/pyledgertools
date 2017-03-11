@@ -25,9 +25,9 @@ setup(name='pyledgertools',
       license='Public Domain',
       packages=['pyledgertools'],
       install_requires=[
+        'nose',
         'ofxtools',
         'PyYaml',
       ],
       include_package_data=True,
-      zip_safe=False
-)
+      zip_safe=False)
