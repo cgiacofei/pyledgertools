@@ -1,0 +1,13 @@
+
+2017-01-04  Daycare 
+    ; md5: 2ae47dbfefd0160108feb8062618f071
+    * Assets:Banks:Checking                                           $ -160.00
+    * Expenses:Fixed:Personal:Childcare                                $ 160.00
+
+2017-01-06  Check Deposit 
+    ; md5: c25db0d0661221d85a7452272c4ccf5a
+    ; payee: Sweet Income
+    * Assets:Banks:Suntrust:Checking                                   $ 152.00
+        ; :TestTag:OtherTag:
+    * Revenue:Other                                                   $ -152.00
+        ; meta: 101
