@@ -124,7 +124,7 @@ def build_journal(ofx_file, config_accts):
         routing = statement.account.bankid
         account = statement.account.acctid
         currency = statement.currency
-        balance = statement.ledgerbal.balamt
+        balance = float(statement.ledgerbal.balamt)
         stmnt_date = strftime(statement.ledgerbal.dtasof, '%Y-%m-%d')
 
         acct_options = find_in_config(config_accts, 'account_id', account)
@@ -147,7 +147,7 @@ def build_journal(ofx_file, config_accts):
             meta = []
 
             payee = transaction.name
-            amount = transaction.trnamt
+            amount = float(transaction.trnamt)
             trn_date = strftime(transaction.dtposted, '%Y-%m-%d')
             trn_id = transaction.refnum
 
