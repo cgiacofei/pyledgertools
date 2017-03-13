@@ -48,13 +48,13 @@ def import_journal(journal_string):
 
         # Is tranasaction
         if re.match('^\d+', blocks[idx][0]) != None:
-            journal.append(process_transaction(blocks[idx][0]))
+            journal.append(process_transaction(blocks[idx]))
 
         elif re.match('^P', blocks[idx][0]) != None:
-             journal.append(process_commodity_price(blocks[idx][0]))
+             journal.append(process_commodity_price(blocks[idx]))
 
         elif re.match('^~', blocks[idx][0]) != None:
-             journal.append(process_budget(blocks[idx][0]))
+             journal.append(process_budget(blocks[idx]))
 
         elif re.match('^=', blocks[idx][0]) != None:
-             journal.append(process_automated(blocks[idx][0]))
+             journal.append(process_automated(blocks[idx]))
