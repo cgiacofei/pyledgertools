@@ -4,6 +4,14 @@ pyledgertools package
 Submodules
 ----------
 
+pyledgertools.classifier module
+-------------------------------
+
+.. automodule:: pyledgertools.classifier
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pyledgertools.cli module
 ------------------------
 
@@ -24,14 +32,6 @@ pyledgertools.rule_parser module
 --------------------------------
 
 .. automodule:: pyledgertools.rule_parser
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-pyledgertools.train_from_ledger module
---------------------------------------
-
-.. automodule:: pyledgertools.train_from_ledger
     :members:
     :undoc-members:
     :show-inheritance:
