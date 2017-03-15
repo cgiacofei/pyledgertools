@@ -1,4 +1,6 @@
 #! /usr/bin/env python3
+"""OFX file parsing."""
+
 from __future__ import print_function
 
 from datetime import datetime
@@ -281,8 +283,8 @@ def export_journal(balances, transactions, **kwargs):
     """Send journal to files/screen.
 
     Parameters:
-        balanes (list): List of :obj:`Transaction` objects containing 
-            :obj:`Allocation` objects with the `assertion` flag set to ``True``.
+        balanes (list): List of :obj:`Transaction` objects containing
+            :obj:`Allocation` objects with `assertion` flag set to ``True``.
         transactions (list): :obj:`Transaction` objects to export.
 
     Keyword Args:
