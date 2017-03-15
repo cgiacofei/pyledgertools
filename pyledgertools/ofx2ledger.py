@@ -4,7 +4,6 @@ from __future__ import print_function
 from datetime import datetime
 import hashlib
 from ofxtools import OFXTree
-import os
 import sys
 
 from pyledgertools.rule_parser import walk_rules, build_rules, make_rule
@@ -12,6 +11,10 @@ from pyledgertools.rule_parser import walk_rules, build_rules, make_rule
 now = datetime.now
 strftime = datetime.strftime
 
+CURRENCY_LOOKUP = {
+    'USD': '$',
+}
+"""Dictoinary for converting ofx currency string to a proper symbol."""
 
 def make_tag_string(tags, indent):
     t = ':'.join([x for x in tags])
@@ -199,7 +202,7 @@ def build_journal(ofx_file, config_accts):
 
         routing = statement.account.bankid
         account = statement.account.acctid
-        currency = statement.currency
+        currency = CURRENCY_LOOKUP[statement.currency]
         balance = statement.ledgerbal.balamt
         stmnt_date = strftime(statement.ledgerbal.dtasof, '%Y-%m-%d')
 
@@ -208,6 +211,7 @@ def build_journal(ofx_file, config_accts):
         a_assert = Allocation(
             account=acct_options['ledger_from'],
             amount=balance,
+            currency=currency,
             assertion=True
         )
 
