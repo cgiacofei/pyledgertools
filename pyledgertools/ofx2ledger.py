@@ -13,11 +13,6 @@ now = datetime.now
 strftime = datetime.strftime
 
 
-class SafeDict(dict):
-    def __missing__(self, key):
-        return '{' + key + '}'
-
-
 def make_tag_string(tags, indent):
     t = ':'.join([x for x in tags])
     return '{}; :{}:'.format(indent, t)
@@ -50,13 +45,19 @@ class Allocation(object):
         account (str): Name of the ledger account for this allocation.
         amount (float): Dollar value of the allocation.
         currency (str): String representing the allocation commodity.
-        assertion (bool): Set to ``True`` if allocation is a balance assertion.
+            ``$``, ``USD``, ``CAN`` etc.
+        assertion (bool): Set to `True` if allocation is a balance assertion.
             Allocation will be represented as:
-                ``<account>  = <currency> <amount>``
+            ::
+
+            <account>                                      = <currency> <amount>
+
             Instead of:
-                ``<account>  <currency> <amount>``
-        tags (list):
-        metadata (list):
+            ::
+
+            <account>                                        <currency> <amount>
+        tags (list): Tag strings to add to the allocation.
+        metadata (list): Key/value pairs to add to allocation.
     """
 
     def __init__(self, **kwargs):
@@ -67,13 +68,8 @@ class Allocation(object):
             amount (float): Dollar value of the allocation.
             currency (str): String representing the allocation commodity.
             assertion (bool): Set to 'True' if allocation is balance assertion.
-
-                Allocation will be represented as:
-                    ``<account>  = <currency> <amount>``
-                Instead of:
-                    ``<account>  <currency> <amount>``
-            tags (list):
-            metadata (list):
+            tags (list): Tag strings to add to the allocation.
+            metadata (list): Key/value pairs to add to allocation.
         """
         self.account = kwargs['account']
         self.amount = kwargs['amount']
@@ -86,8 +82,8 @@ class Allocation(object):
         """ Allocation as string. Fix to width in this.
 
         Keyword Args:
-            width (int): Text column to align the end of each transaction
-                line to.
+            width (int): White space added after allocation acount to align last
+                digit of 'amount' to column `width`.
             indent (int): Number of spaces to indent each level of transaction.
 
         Return:
@@ -101,7 +97,8 @@ class Allocation(object):
         else:
             amt = '{} {:.2f}'.format(self.currency, self.amount)
 
-        fill = ' ' * (width - len(acct + amt + ind))
+        # Calculate fill, split amount at decimal to align to decimal.
+        fill = ' ' * (width - len(acct + amt.split('.')[0] + ind + 3))
 
         outlist = []
         outlist.append(ind + acct + fill + amt)
@@ -280,8 +277,8 @@ def export_journal(balances, transactions, **kwargs):
     """Send journal to files/screen.
 
     Parameters:
-        balanes (list): List of :obj:`Transaction` containing :obj:`Allocation`
-            objects with the assertion flag set to *True*.
+        balanes (list): List of :obj:`Transaction` objects containing 
+            :obj:`Allocation` objects with the `assertion` flag set to ``True``.
         transactions (list): :obj:`Transaction` objects to export.
 
     Keyword Args:
