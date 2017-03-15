@@ -24,6 +24,12 @@ def STARTS_WITH(rule_value, tran_value):
 
 def ENDS_WITH(rule_value, tran_value):
     """Return True if tran_value ends with rule_value
+
+    Parameters:
+        rule_value: Value from the rule file to check for.
+        tran_value: Value from transaction.
+    Return:
+        bool: Will return true if `tran_value` ends with `rule_value`.
     """
 
     rule_value = rule_value.lower()
@@ -34,8 +40,14 @@ def ENDS_WITH(rule_value, tran_value):
 
 
 def EQUALS(rule_value, tran_value):
-    """Return True if rule_value is euqal to tran_value.  Works for both
-    numbers and strings
+    """Test for equality
+
+    Parameters:
+        rule_value: Value from the rule file to check for.
+        tran_value: Value from transaction.
+    Return:
+        bool: Return True if rule_value is euqal to tran_value.  Works for both
+        numbers and strings
     """
 
     try:
@@ -180,26 +192,51 @@ def make_rule(payee, account):
     return rule_yml[payee]
 
 
-def check_condition(condition, trans_obj):
+def check_condition(condition, tran_obj):
     """Convert the condition string from the rule into the
     appropriate function and evaluate it.
+    ::
+
+        Company Income:
+          Conditions:
+            - AND:
+              - payee CONTAINS My Employer
+              - AND:
+                - amount GT 800.00
+          Allocations:
+            - 100 PERCENT Revenue:Salary
+
+        Company Bonus:
+          Conditions:
+            - AND:
+              - payee CONTAINS My Employer
+              - AND:
+                - amount LT 800.00
+          Allocations:
+            - 100 PERCENT Revenue:Bonus
+
+    Parameters:
+        condition (str): Formatted string from rules file.
+        tran_obj (Transaction): Transaction object to test against.
     """
     condition = condition.split(' ')
 
     field = condition[0]
     test = condition[1]
-    test_value = ' '.join(condition[2:])
+    rule_value = ' '.join(condition[2:])
 
     # Use string value to access comparison function
     # sys.module[__name__] returns this module
     test_func = getattr(sys.modules[__name__], test)
 
-    try:
-        field_value = trans_obj[FIELDS[field]]
-    except:
-        field_value = ''
+    # If testing the transaction amount, the amount of the first allocation
+    # which contains the primary bank account side of the transactions.
+    if field == 'amount':
+        tran_value = tran_obj.allocations[0].amount
+    else:
+        tran_value = getattr(tran_obj, field.lower())
 
-    return test_func(test_value, field_value)
+    return test_func(rule_value, tran_value)
 
 
 def walk_rules(conditions, trans_obj=None, logic=None):

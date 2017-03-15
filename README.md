@@ -1,3 +1,6 @@
 # pyledgertools
- [![Build Status](https://travis-ci.org/cgiacofei/pyledgertools.svg?branch=master)](https://travis-ci.org/cgiacofei/pyledgertools) master  
-[![Build Status](https://travis-ci.org/cgiacofei/pyledgertools.svg?branch=dev)](https://travis-ci.org/cgiacofei/pyledgertools) dev
+
+
+# Style
+
+Using the [Google](http://google.github.io/styleguide/pyguide.html#Comments) style guide.
