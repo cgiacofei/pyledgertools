@@ -28,6 +28,7 @@ setup(name='pyledgertools',
         'nose',
         'ofxtools',
         'PyYaml',
+        'naiveBayesClassifier',
       ],
       include_package_data=True,
       zip_safe=False)
