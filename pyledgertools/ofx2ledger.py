@@ -8,7 +8,7 @@ import hashlib
 from ofxtools import OFXTree
 import sys
 
-from pyledgertools.rule_parser import walk_rules, build_rules, make_rule
+from pyledgertools.rule_parser import walk_rules
 
 now = datetime.now
 strftime = datetime.strftime
