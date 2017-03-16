@@ -4,8 +4,11 @@ from argparse import ArgumentParser
 from yaml import load
 
 from pyledgertools.ofx2ledger import build_journal
+from os.path import expanduser
 
-def main():
+
+def get_args():
+    """Build CLI arguments list."""
 
     parser = ArgumentParser()
 
@@ -34,18 +37,26 @@ def main():
         help="File or directory containing matching rules."
     )
 
-    options = parser.parse_args()
+    args = parser.parse_args()
 
-    if options.config:
-        c_path = options.config
+    return args
+
+
+def main():
+    home = expanduser("~")
+
+    args = get_args()
+
+    if args.config:
+        c_path = args.config
 
     else:
         ROOT = os.path.dirname(os.path.realpath(__file__))
-        c_path = os.path.join(ROOT, 'ofx.conf')
+        c_path = os.path.join(home,'.conf','ledgertools', 'ofx.conf')
 
     config = load(open(c_path, 'r'))
 
-    build_journal(options.ofx_file, config['accounts'])
+    build_journal(args.ofx_file, config['accounts'])
 
 
 if __name__ == "__main__":
