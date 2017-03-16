@@ -94,11 +94,10 @@ class Classifier(object):
             rules_file (str): Path to rules.
         """
 
+        self._tknizer = tokenizer.Tokenizer(signs_to_remove=['?!%.'])
+        self._trainer = Trainer(self._tknizer)
+
         if journal_file is not None:
-            self._tknizer = tokenizer.Tokenizer(signs_to_remove=['?!%'])
-
-            self._trainer = Trainer(self._tknizer)
-
             with open(journal_file) as journal:
                 journal_string = journal.read()
 
@@ -137,7 +136,7 @@ class Classifier(object):
         else:
             self._rules = None
 
-    def add_data(self, text, category):
+    def update(self, text, category):
         """Update training data with new examples.
         
         Adds new data to the trainer then generates a new classifier. Can be
@@ -164,7 +163,11 @@ class Classifier(object):
         """
 
         if method == 'bayes':
-            return self._classifier.classify(text)
+            if self._classifier is not None:
+                return self._classifier.classify(text)
+            else:
+                return None
+
         elif method == 'rules':
             raise NotImplementedError(
                 'Classification based on rules file not yet implemented'
