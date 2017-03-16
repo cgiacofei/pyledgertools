@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 
+from configparser import NoOptionError
 from datetime import datetime
 import hashlib
 from ofxtools import OFXTree
@@ -224,10 +225,10 @@ def build_journal(ofx_file, config_accts):
         balance = statement.ledgerbal.balamt
         stmnt_date = strftime(statement.ledgerbal.dtasof, '%Y-%m-%d')
 
-        acct_options = find_in_config(config_accts, 'account_id', account)
+        acct_options = find_in_config(config_accts, 'acctnum', account)
 
         a_assert = Allocation(
-            account=acct_options['ledger_from'],
+            account=acct_options['from'],
             amount=balance,
             currency=currency,
             assertion=True
@@ -260,7 +261,7 @@ def build_journal(ofx_file, config_accts):
             meta.append(('md5', hash_obj.hexdigest()))
 
             a_tran = Allocation(
-                account=acct_options['ledger_from'],
+                account=acct_options['from'],
                 amount=amount
             )
 
@@ -280,19 +281,23 @@ def build_journal(ofx_file, config_accts):
     return balance_assertions, transactions
 
 
-def find_in_config(config_list, key, value):
+def find_in_config(config, key, value):
     """Find an item in a list of dicts.
 
     Parameters:
-        config_list (list): list of account configuration :obj:`dict`.
+        config (ConfigParser): ConfigParser object to search.
         key (str): String value of the :obj:`dict` key to search.
         value (str): Value to search for.
-
     """
 
-    for item in config_list:
-        if item[key] == value:
-            return item
+    for section in config.sections():
+        try:
+            if config.get(section=section, option=key) == value:
+                return dict(config.items(section))
+        except NoOptionError:
+            pass
+
+    return None
 
 
 def export_journal(balances, transactions, **kwargs):
