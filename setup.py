@@ -32,9 +32,11 @@ setup(
         'naiveBayesClassifier',
     ],
     include_package_data=True,
-    zip_safe=False
+    zip_safe=False,
     entry_points = {
         'console_scripts': [
             'ledger_tool=pyledgertools.cli:main',
-    ],
+            'int-ofx=pyledgertools.cli:interactive'
+        ]
+    }
 )
