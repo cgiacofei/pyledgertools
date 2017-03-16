@@ -103,7 +103,7 @@ class Allocation(object):
             amt = '{} {:.2f}'.format(self.currency, self.amount)
 
         # Calculate fill, split amount at decimal to align to decimal.
-        fill = ' ' * (width - len(acct + amt.split('.')[0] + ind + 3))
+        fill = ' ' * (width - len(acct + amt.split('.')[0] + ind) - 3)
 
         outlist = []
         outlist.append(ind + acct + fill + amt)
