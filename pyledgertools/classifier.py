@@ -15,7 +15,7 @@ import yaml
 DOLLAR_REGEX = '([\$A_Z]+) ([\-0-9]+.[0-9]{2,2})'
 
 # Allocation RegEx
-ALLOC_REGEX = '\s+([A-Za-z0-9:_]* ?[A-Za-z0-9:_]*)\s{2,}' + DOLLAR_REGEX
+ALLOC_REGEX = '\s+([A-Za-z0-9:_-]* ?[A-Za-z0-9:_-]*)\s{2,}' + DOLLAR_REGEX
 TRANS_REGEX = '^\d{4,4}-\d{2,2}-\d{2,2}\s+[!\*]?\s?(?P<payee>[&#\w\s]+)'
 
 
