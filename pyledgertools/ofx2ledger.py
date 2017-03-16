@@ -188,6 +188,22 @@ class Transaction(object):
 
         return '\n'.join(outlist)
 
+    def add(self, account, amount, currency):
+        """Add an allocation to a transaction.
+
+        Parameters:
+            account (str): Name of the ledger account for this allocation.
+            amount (float): Dollar value of the allocation.
+            currency (str): String representing the allocation commodity.
+        """
+        new_allocation = Allocation(
+            account = account,
+            amount = amount,
+            currency = currency
+        )
+
+        self.allocations.append(new_allocation)
+
 
 def build_journal(ofx_file, config_accts):
     """Accept an ofx file and parse into list of Tansaction objects."""
