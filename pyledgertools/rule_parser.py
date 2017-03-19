@@ -1,3 +1,6 @@
+import yaml
+import os
+import sys
 
 # Comparison functions
 # Dates used as strings in format YYYY-MM-DD so string comparison can be used
@@ -204,7 +207,7 @@ def check_condition(condition, tran_obj):
     """
     condition = condition.split(' ')
 
-    field = condition[0]
+    field = condition[0].lower()
     test = condition[1]
     rule_value = ' '.join(condition[2:])
 
@@ -217,7 +220,7 @@ def check_condition(condition, tran_obj):
     if field == 'amount':
         tran_value = tran_obj.allocations[0].amount
     else:
-        tran_value = getattr(tran_obj, field.lower())
+        tran_value = getattr(tran_obj, field)
 
     return test_func(rule_value, tran_value)
 
