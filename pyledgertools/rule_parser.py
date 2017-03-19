@@ -244,7 +244,6 @@ def build_rules(rule_loc):
 
 def walk_rules(conditions, trans_obj=None, logic=None):
     results = []
-
     for condition in conditions:
         if isinstance(condition, dict):
             new_logic = list(condition.keys())[0]
@@ -253,6 +252,9 @@ def walk_rules(conditions, trans_obj=None, logic=None):
             res = check_condition(condition, trans_obj)
 
         results.append(res)
+
+    if logic is None:
+        logic = 'AND'
 
     # Evaluate results
     l_func = getattr(sys.modules[__name__], logic)
