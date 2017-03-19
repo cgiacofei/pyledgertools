@@ -258,7 +258,8 @@ def build_journal(ofx_file, config_accts):
             # Build md5 Hash of transaction
             check_hash = trn_id + trn_date + payee + str(amount)
             hash_obj = hashlib.md5(check_hash.encode())
-            meta.append(('md5', hash_obj.hexdigest()))
+            meta.append(('UUID', hash_obj.hexdigest()))
+            meta.append(('ImportDate', strftime(now(), '%Y-%m-%d')))
 
             a_tran = Allocation(
                 account=acct_options['from'],
