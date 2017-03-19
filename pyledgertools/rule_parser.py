@@ -225,6 +225,23 @@ def check_condition(condition, tran_obj):
     return test_func(rule_value, tran_value)
 
 
+def build_rules(rule_loc):
+    """Build rules from file or directory."""
+    if os.path.isfile(rule_loc):
+        rules = yaml.load(open(rule_loc))
+
+    # If directory is given find all .rules files in directory
+    # and build a single dictionary from their contents.
+    elif os.path.isdir(rule_loc):
+        rules = {}
+        for root, dirs, files in os.walk(rule_loc):
+            for file in files:
+                if file.endswith('.rules'):
+                    rules.update(yaml.load(open(os.path.join(root, file))))
+
+    return rules
+
+
 def walk_rules(conditions, trans_obj=None, logic=None):
     results = []
 
