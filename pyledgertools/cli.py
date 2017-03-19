@@ -72,6 +72,8 @@ def interactive():
     args = get_args()
     bal, trans = main()
 
+    trans.sort(key=lambda x: x.date)
+
     if args.ledger_file is not None:
         interactive_classifier = Classifier(journal_file=args.ledger_file)
     else:
