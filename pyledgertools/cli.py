@@ -68,6 +68,7 @@ def main():
 def interactive():
     import sys
     from pyledgertools.classifier import Classifier
+    from pyledgertools.rule_parser import walk_rules, build_rules
 
     args = get_args()
     bal, trans = main()
@@ -80,17 +81,40 @@ def interactive():
         interactive_classifier = Classifier()
 
     for posting in trans:
+        match = None
+        result = None
         text = posting.payee
         amount = posting.allocations[0].amount
         currency = posting.allocations[0].currency
 
-        result = interactive_classifier.classify(text, method='bayes')
+        if args.rule_file is not None:
+            rules = build_rules(args.rule_file)
+
+        for rule in rules.keys():
+            match = walk_rules(rules[rule]['conditions'], posting)
+            if match:
+                found_rule = rules[rule]
+                break
+                sys.exit()
+            else:
+                found_rule = {}
+
+        try:
+            skip = found_rule['ignore']
+        except KeyError:
+            skip = False
+
+        if (args.rule_file is None or found_rule == {}) and skip == False:
+            result = interactive_classifier.classify(text, method='bayes')
 
         print('')
         print('=' * 80)
         print(posting.to_string())
         print('')
-        if result is None:
+        if skip == True:
+            print('Skip transfer Deposit')
+            pass
+        elif result is None:
             print('No matches found, enter an account name:')
             account = input(': ')
             print('')
