@@ -102,7 +102,7 @@ def interactive():
     except KeyError:
         pass
 
-    
+
 
     getter = get_plugin(manager, conf['downloader'])
     parser = get_plugin(manager, conf['parser'])
@@ -209,6 +209,8 @@ def interactive():
             print(transaction.to_string())
             with open('tmp.ledger', 'a') as outfile:
                 print(transaction.to_string(), '\n', file=outfile)
+
+            account = None
 
         print('')
         print('=' * 80)
