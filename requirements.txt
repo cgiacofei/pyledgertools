@@ -1,8 +1,21 @@
 appdirs==1.4.3
-naiveBayesClassifier==0.1.3.1
+decorator==4.0.11
+ipython==5.3.0
+ipython-genutils==0.2.0
+-e git+https://github.com/muatik/naive-bayes-classifier@bb81fb0bf14304965f708c355064ec82f2e25c3c#egg=naiveBayesClassifier
 nose==1.3.7
 ofxtools==0.3.13
 packaging==16.8
+pexpect==4.2.1
+pickleshare==0.7.4
+prompt-toolkit==1.0.13
+ptyprocess==0.5.1
+Pygments==2.2.0
+pyledgertools==0.1
 pyparsing==2.2.0
 PyYAML==3.12
+simplegeneric==0.8.1
 six==1.10.0
+traitlets==4.3.2
+wcwidth==0.1.7
+Yapsy==1.11.223
