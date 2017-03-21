@@ -1,0 +1,8 @@
+[Core]
+Name = Naive Bayes Classifier
+Module = naive_bayes
+
+[Documentation]
+Author = Chris Giacofei
+Version = 0.1
+Description = Classify text based on naive bayes classification 

@@ -1,6 +1,10 @@
 import yaml
 import os
 import sys
+import re
+
+from pyledgertools import plugin
+
 
 # Comparison functions
 # Dates used as strings in format YYYY-MM-DD so string comparison can be used
@@ -149,115 +153,118 @@ def XOR(bools):
        and False if there are an even number of true items.
     """
     # Return false if there are an even number of True results.
-    if len([x for x in bools if x == True]) % 2 == 0:
+    if len([x for x in bools if x is True]) % 2 == 0:
         return False
 
     return True
 
 
-def make_rule(payee, account):
-    payee = re.sub('[^a-zA-Z0-9 \n\.,]', '', payee)
+class RuleClassifier(plugin.IClassify):
+    """Rule based classifier."""
 
-    rule_template = """---
-        '{name}':
-          Change_Payee: False
-          Conditions:
-            - AND:
-              - PAYEE CONTAINS {payee}
-          Allocations:
-            - 100 PERCENT {account}
+    def __init__(self):
+        self.is_activated = False
+
+    def make_rule(payee, account):
+        payee = re.sub('[^a-zA-Z0-9 \n\.,]', '', payee)
+
+        rule_template = """---
+            '{name}':
+              Change_Payee: False
+              Conditions:
+                - AND:
+                  - PAYEE CONTAINS {payee}
+              Allocations:
+                - 100 PERCENT {account}
+            """
+        rule_string = rule_template.format(
+            name=payee,
+            payee=payee,
+            account=account
+        )
+
+        rule_yml = yaml.load(rule_string)
+
+        return rule_yml[payee]
+
+    def check_condition(condition, tran_obj):
+        """Convert the condition string from the rule into the
+        appropriate function and evaluate it.
+        ::
+
+            Company Income:
+              Conditions:
+                - AND:
+                  - payee CONTAINS My Employer
+                  - AND:
+                    - amount GT 800.00
+              Allocations:
+                - 100 PERCENT Revenue:Salary
+
+            Company Bonus:
+              Conditions:
+                - AND:
+                  - payee CONTAINS My Employer
+                  - AND:
+                    - amount LT 800.00
+              Allocations:
+                - 100 PERCENT Revenue:Bonus
+
+        Parameters:
+            condition (str): Formatted string from rules file.
+            tran_obj (Transaction): Transaction object to test against.
         """
-    rule_string = rule_template.format(
-        name=payee,
-        payee=payee,
-        account=account
-    )
+        condition = condition.split(' ')
 
-    rule_yml = yaml.load(rule_string)
+        field = condition[0].lower()
+        test = condition[1]
+        rule_value = ' '.join(condition[2:])
 
-    return rule_yml[payee]
+        # Use string value to access comparison function
+        # sys.module[__name__] returns this module
+        test_func = getattr(sys.modules[__name__], test)
 
+        # If testing the transaction amount, the amount of the first allocation
+        # which contains the primary bank account side of the transactions.
+        if field == 'amount':
+            tran_value = tran_obj.allocations[0].amount
+        else:
+            tran_value = getattr(tran_obj, field)
 
-def check_condition(condition, tran_obj):
-    """Convert the condition string from the rule into the
-    appropriate function and evaluate it.
-    ::
+        return test_func(rule_value, tran_value)
 
-        Company Income:
-          Conditions:
-            - AND:
-              - payee CONTAINS My Employer
-              - AND:
-                - amount GT 800.00
-          Allocations:
-            - 100 PERCENT Revenue:Salary
+    def build_rules(rule_loc):
+        """Build rules from file or directory."""
+        if os.path.isfile(rule_loc):
+            rules = yaml.load(open(rule_loc))
 
-        Company Bonus:
-          Conditions:
-            - AND:
-              - payee CONTAINS My Employer
-              - AND:
-                - amount LT 800.00
-          Allocations:
-            - 100 PERCENT Revenue:Bonus
+        # If directory is given find all .rules files in directory
+        # and build a single dictionary from their contents.
+        elif os.path.isdir(rule_loc):
+            rules = {}
+            for root, dirs, files in os.walk(rule_loc):
+                for file in files:
+                    if file.endswith('.rules'):
+                        rules.update(yaml.load(open(os.path.join(root, file))))
 
-    Parameters:
-        condition (str): Formatted string from rules file.
-        tran_obj (Transaction): Transaction object to test against.
-    """
-    condition = condition.split(' ')
+        return rules
 
-    field = condition[0].lower()
-    test = condition[1]
-    rule_value = ' '.join(condition[2:])
+    def walk_rules(self, conditions, trans_obj=None, logic=None):
+        results = []
+        for condition in conditions:
+            if isinstance(condition, dict):
+                new_logic = list(condition.keys())[0]
+                res = self.walk_rules(condition[new_logic], trans_obj, new_logic)
+            if isinstance(condition, str):
+                res = self.check_condition(condition, trans_obj)
 
-    # Use string value to access comparison function
-    # sys.module[__name__] returns this module
-    test_func = getattr(sys.modules[__name__], test)
+            results.append(res)
 
-    # If testing the transaction amount, the amount of the first allocation
-    # which contains the primary bank account side of the transactions.
-    if field == 'amount':
-        tran_value = tran_obj.allocations[0].amount
-    else:
-        tran_value = getattr(tran_obj, field)
+        if logic is None:
+            logic = 'AND'
 
-    return test_func(rule_value, tran_value)
+        # Evaluate results
+        l_func = getattr(sys.modules[__name__], logic)
+        final = l_func(results)
 
-
-def build_rules(rule_loc):
-    """Build rules from file or directory."""
-    if os.path.isfile(rule_loc):
-        rules = yaml.load(open(rule_loc))
-
-    # If directory is given find all .rules files in directory
-    # and build a single dictionary from their contents.
-    elif os.path.isdir(rule_loc):
-        rules = {}
-        for root, dirs, files in os.walk(rule_loc):
-            for file in files:
-                if file.endswith('.rules'):
-                    rules.update(yaml.load(open(os.path.join(root, file))))
-
-    return rules
-
-
-def walk_rules(conditions, trans_obj=None, logic=None):
-    results = []
-    for condition in conditions:
-        if isinstance(condition, dict):
-            new_logic = list(condition.keys())[0]
-            res = walk_rules(condition[new_logic], trans_obj, new_logic)
-        if isinstance(condition, str):
-            res = check_condition(condition, trans_obj)
-
-        results.append(res)
-
-    if logic is None:
-        logic = 'AND'
-
-    # Evaluate results
-    l_func = getattr(sys.modules[__name__], logic)
-    final = l_func(results)
-
-    return final
+        return final

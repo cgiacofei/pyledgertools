@@ -1,0 +1,8 @@
+[Core]
+Name = Rule Based Classifier
+Module = rule_parse
+
+[Documentation]
+Author = Chris Giacofei
+Version = 0.1
+Description = Classify transactions based on rule logic. 

@@ -12,6 +12,8 @@ import os
 import re
 import yaml
 
+from pyledgertools import plugin
+
 DOLLAR_REGEX = '([\$A_Z]+) ([\-0-9]+.[0-9]{2,2})'
 
 # Allocation RegEx
@@ -74,7 +76,7 @@ def train_journal(journal_string):
     return return_data
 
 
-class Classifier(object):
+class Classifier(plugin.IClassify):
     """Custom class to implement naive bayes classification using
     naiveBayesClassifier.
 
@@ -93,6 +95,7 @@ class Classifier(object):
             journal_file (str): Path to journal file to import.
             rules_file (str): Path to rules.
         """
+        self.is_activated = False
 
         self._tknizer = tokenizer.Tokenizer(signs_to_remove=['?!%.'])
         self._trainer = Trainer(self._tknizer)
@@ -138,7 +141,7 @@ class Classifier(object):
 
     def update(self, text, category):
         """Update training data with new examples.
-        
+
         Adds new data to the trainer then generates a new classifier. Can be
         useful for updating on the fly if performing an interactive data import.
 
