@@ -4,9 +4,13 @@ from argparse import ArgumentParser
 import os
 from os.path import expanduser
 from yaml import load
+from yapsy.PluginManager import PluginManager
+from yapsy.IPlugin import IPlugin
 
 from pyledgertools.ofx2ledger import build_journal
+from pyledgertools.plugin import IDownload, IClassify, IModify
 
+DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 def get_args():
@@ -45,6 +49,28 @@ def get_args():
 
 
 def main():
+    """Run the command line interface."""
+    # Build the manager.
+    plugin_manager = PluginManager()
+
+    plugin_manager.setCategoriesFilter({
+        'classify': IClassify,
+        'download': IDownload,
+        'modify': IModify,
+    })
+
+    # Tell it the default place(s) where to find plugins.
+    plugin_manager.setPluginPlaces([
+        os.path.join(DIR_PATH, 'plugins')
+    ])
+
+    plugin_manager.collectPlugins()
+
+    print('All', [x.name for x in plugin_manager.getAllPlugins()])
+    print('Download', [x.name for x in plugin_manager.getPluginsOfCategory('download')])
+    print('Classify', [x.name for x in plugin_manager.getPluginsOfCategory('classify')])
+    print('Modify', [x.name for x in plugin_manager.getPluginsOfCategory('modify')])
+
     from configparser import ConfigParser
 
     config = ConfigParser()
@@ -153,6 +179,7 @@ def interactive():
 
         print('')
         print('=' * 80)
+
 
 if __name__ == "__main__":
     main()
