@@ -16,30 +16,35 @@ def get_args():
     parser = ArgumentParser()
 
     parser.add_argument(
-        "-i", "--input-ofx",
-        dest="ofx_file",
+        '-i', '--input-ofx',
+        dest='ofx_file',
         default=None,
-        help=".OFX file to parse"
+        help='.OFX file to parse'
     )
     parser.add_argument(
-        "-l", "--ledger-file",
-        dest="ledger_file",
+        '-l', '--ledger-file',
+        dest='ledger_file',
         default=None,
-        help="Ledger file to check transactions against."
+        help='Ledger file to check transactions against.'
     )
     parser.add_argument(
-        "-c", "--config",
-        dest="config",
+        '-c', '--config',
+        dest='config',
         default=None,
-        help="config file for account names/numbers etc."
+        help='config file for account names/numbers etc.'
     )
     parser.add_argument(
-        "-r", "--rules",
-        dest="rule_file",
+        '-r', '--rules',
+        dest='rule_file',
         default=None,
-        help="File or directory containing matching rules."
+        help='File or directory containing matching rules.'
     )
-
+    parser.add_argument(
+        '-a', '--account',
+        dest='account',
+        default=None,
+        help='Config section to use for import.'
+    )
     args = parser.parse_args()
 
     return args
@@ -89,7 +94,7 @@ def interactive():
     # -------------------------------------------------------------------------
     # Test suntrust
     # -------------------------------------------------------------------------
-    conf = dict(config.items('fixed'))
+    conf = dict(config.items(args.account))
     try:
         global_conf = dict(config.items(conf['global']))
         conf.update(global_conf)
@@ -107,27 +112,15 @@ def interactive():
     getter = get_plugin(manager, conf['downloader'])
     parser = get_plugin(manager, conf['parser'])
 
-    file_path = getter.download()
+    if args.ofx_file == None:
+        file_path = getter.download()
+    else:
+        file_path = args.ofx_file
 
     bal, trans = parser.build_journal(file_path, conf)
 
     balances = balances + bal
     transactions = transactions + trans
-
-    # -------------------------------------------------------------------------
-    # Test cap one checking
-    # -------------------------------------------------------------------------
-    #~ conf = dict(config.items('flex'))
-
-    #~ getter = get_plugin(manager, conf['downloader'])
-    #~ parser = get_plugin(manager, conf['parser'])
-
-    #~ file_path = getter.download()
-
-    #~ bal, trans = parser.build_journal(file_path, conf)
-
-    #~ balances = balances + bal
-    #~ transactions = transactios + trans
 
     transactions.sort(key=lambda x: x.date)
 
@@ -207,7 +200,7 @@ def interactive():
 
             print('---------------------')
             print(transaction.to_string())
-            with open('tmp.ledger', 'a') as outfile:
+            with open(conf['ledger_file'], 'a') as outfile:
                 print(transaction.to_string(), '\n', file=outfile)
 
             account = None
