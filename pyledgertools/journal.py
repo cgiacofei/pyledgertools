@@ -13,10 +13,6 @@ import sys
 now = datetime.now
 strftime = datetime.strftime
 
-CURRENCY_LOOKUP = {
-    'USD': '$',
-}
-"""Dictoinary for converting ofx currency string to a proper symbol."""
 
 def make_tag_string(tags, indent):
     t = ':'.join([x for x in tags])
@@ -44,14 +40,14 @@ def make_meta_string(metadata, indent):
 
 
 class Posting(object):
-    """Allocation class for transactions.
+    """Posting class for transactions.
 
     Attributes:
-        account (str): Name of the ledger account for this allocation.
-        amount (float): Dollar value of the allocation.
+        account (str): Name of the ledger account for this posting.
+        amount (float): Dollar value of the posting.
         currency (str): String representing the allocation commodity.
             ``$``, ``USD``, ``CAN`` etc.
-        assertion (bool): Set to `True` if allocation is a balance assertion.
+        assertion (bool): Set to `True` if posting is a balance assertion.
             Allocation will be represented as:
             ::
 
@@ -61,20 +57,20 @@ class Posting(object):
             ::
 
             <account>                                        <currency> <amount>
-        tags (list): Tag strings to add to the allocation.
-        metadata (list): Key/value pairs to add to allocation.
+        tags (list): Tag strings to add to the posting.
+        metadata (list): Key/value pairs to add to posting.
     """
 
     def __init__(self, **kwargs):
         """Initialize allocation.
 
         Parameters:
-            account (str): Name of the ledger account for this allocation.
-            amount (float): Dollar value of the allocation.
+            account (str): Name of the ledger account for this posting.
+            amount (float): Dollar value of the posting.
             currency (str): String representing the allocation commodity.
-            assertion (bool): Set to 'True' if allocation is balance assertion.
-            tags (list): Tag strings to add to the allocation.
-            metadata (list): Key/value pairs to add to allocation.
+            assertion (bool): Set to 'True' if posting is balance assertion.
+            tags (list): Tag strings to add to the posting.
+            metadata (list): Key/value pairs to add to posting.
         """
         self.account = kwargs['account']
         self.amount = kwargs['amount']
@@ -84,15 +80,15 @@ class Posting(object):
         self.metadata = kwargs.get('metadata', [])
 
     def to_string(self, width=80, indent=4):
-        """ Allocation as string. Fix to width in this.
+        """ Posting as string. Fix to width in this.
 
         Keyword Args:
-            width (int): White space added after allocation acount to align last
+            width (int): White space added after posting acount to align last
                 digit of 'amount' to column `width`.
             indent (int): Number of spaces to indent each level of transaction.
 
         Return:
-            str: Ledger-cli formatted string for the allocation.
+            str: Ledger-cli formatted string for the posting.
         """
 
         ind = ' ' * indent
@@ -127,7 +123,7 @@ class Transaction(object):
         tags (list): List of tags to apply to the transaction
         metadata (list): Tags with values given as list of lists.
             ``[['key1', 'value1'], ['key2', 'value2']]``
-        allocations (list): List of :obj:`Allocation` objects
+        postings (list): List of :obj:`Posting` objects
         bankid (str):
         acctid (str):
         account (str):
@@ -183,23 +179,23 @@ class Transaction(object):
         if len(self.metadata) > 0:
             outlist.append(make_meta_string(self.metadata, ind))
 
-        allocations = [a.to_string(indent=indent) for a in self.postings]
-        outlist.append('\n'.join(allocations))
+        postings = [a.to_string(indent=indent) for a in self.postings]
+        outlist.append('\n'.join(postings))
 
         return '\n'.join(outlist)
 
     def add(self, account, amount, currency):
-        """Add an allocation to a transaction.
+        """Add a posting to a transaction.
 
         Parameters:
-            account (str): Name of the ledger account for this allocation.
+            account (str): Name of the ledger account for this posting.
             amount (float): Dollar value of the allocation.
-            currency (str): String representing the allocation commodity.
+            currency (str): String representing the posting commodity.
         """
-        new_allocation = Posting(
+        new_posting = Posting(
             account=account,
             amount=amount,
             currency=currency
         )
 
-        self.allocations.append(new_allocation)
+        self.postings.append(new_posting)
