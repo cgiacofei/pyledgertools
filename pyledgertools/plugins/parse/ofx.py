@@ -59,7 +59,10 @@ class ParseOFX(IPlugin):
                 payee = transaction.name
                 amount = transaction.trnamt
                 trn_date = strftime(transaction.dtposted, '%Y-%m-%d')
-                trn_id = transaction.refnum
+                if transaction.refnum: 
+                    trn_id = transaction.refnum
+                else:
+                    trn_id = transaction.fitid
 
                 # If check number is available add it as metadata
                 check = transaction.checknum
