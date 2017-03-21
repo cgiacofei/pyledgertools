@@ -89,8 +89,6 @@ def interactive():
     balances = []
     transactions = []
 
-
-
     # -------------------------------------------------------------------------
     # Test suntrust
     # -------------------------------------------------------------------------
@@ -107,13 +105,11 @@ def interactive():
     except KeyError:
         pass
 
-
-
     getter = get_plugin(manager, conf['downloader'])
     parser = get_plugin(manager, conf['parser'])
 
-    if args.ofx_file == None:
-        file_path = getter.download()
+    if args.ofx_file is None:
+        file_path = getter.download(conf)
     else:
         file_path = args.ofx_file
 
@@ -140,8 +136,6 @@ def interactive():
         text = transaction.payee
         amount = transaction.postings[0].amount
         currency = transaction.postings[0].currency
-
-
 
         for entry in rules.keys():
             match = rule.walk_rules(rules[entry]['conditions'], transaction)
