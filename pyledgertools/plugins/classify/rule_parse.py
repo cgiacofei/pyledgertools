@@ -3,7 +3,7 @@ import os
 import sys
 import re
 
-from pyledgertools import plugin
+from yapsy.IPlugin import IPlugin
 
 
 # Comparison functions
@@ -159,11 +159,8 @@ def XOR(bools):
     return True
 
 
-class RuleClassifier(plugin.IClassify):
+class RuleClassifier(IPlugin):
     """Rule based classifier."""
-
-    def __init__(self):
-        self.is_activated = False
 
     def make_rule(payee, account):
         payee = re.sub('[^a-zA-Z0-9 \n\.,]', '', payee)
@@ -187,7 +184,7 @@ class RuleClassifier(plugin.IClassify):
 
         return rule_yml[payee]
 
-    def check_condition(condition, tran_obj):
+    def check_condition(self, condition, tran_obj):
         """Convert the condition string from the rule into the
         appropriate function and evaluate it.
         ::
@@ -227,13 +224,13 @@ class RuleClassifier(plugin.IClassify):
         # If testing the transaction amount, the amount of the first allocation
         # which contains the primary bank account side of the transactions.
         if field == 'amount':
-            tran_value = tran_obj.allocations[0].amount
+            tran_value = tran_obj.postings[0].amount
         else:
             tran_value = getattr(tran_obj, field)
 
         return test_func(rule_value, tran_value)
 
-    def build_rules(rule_loc):
+    def build_rules(self, rule_loc):
         """Build rules from file or directory."""
         if os.path.isfile(rule_loc):
             rules = yaml.load(open(rule_loc))

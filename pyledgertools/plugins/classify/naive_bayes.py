@@ -4,15 +4,17 @@
 from naiveBayesClassifier import tokenizer
 from naiveBayesClassifier.trainer import Trainer
 from naiveBayesClassifier.classifier import Classifier as BayesClassifier
-
+from yapsy.IPlugin import IPlugin
 from itertools import groupby
-from math import gcd
+try:
+    from math import gcd
+except ImportError:
+    from fractions import gcd
+
 from operator import itemgetter
 import os
 import re
 import yaml
-
-from pyledgertools import plugin
 
 DOLLAR_REGEX = '([\$A_Z]+) ([\-0-9]+.[0-9]{2,2})'
 
@@ -76,7 +78,7 @@ def train_journal(journal_string):
     return return_data
 
 
-class Classifier(plugin.IClassify):
+class Classifier(object):
     """Custom class to implement naive bayes classification using
     naiveBayesClassifier.
 
@@ -88,6 +90,7 @@ class Classifier(plugin.IClassify):
     class NotImplemented(Exception):
         pass
 
+
     def __init__(self, journal_file=None, rules=None):
         """Classifer initialization.
 
@@ -95,8 +98,6 @@ class Classifier(plugin.IClassify):
             journal_file (str): Path to journal file to import.
             rules_file (str): Path to rules.
         """
-        self.is_activated = False
-
         self._tknizer = tokenizer.Tokenizer(signs_to_remove=['?!%.'])
         self._trainer = Trainer(self._tknizer)
 
@@ -177,3 +178,8 @@ class Classifier(plugin.IClassify):
             )
         else:
             raise NotImplemented('The method `{}` is not valid'.format(method))
+
+
+class PluginLoader(IPlugin):
+    def setup(self, journal_file=None, rules=None):
+        return Classifier(journal_file, rules)

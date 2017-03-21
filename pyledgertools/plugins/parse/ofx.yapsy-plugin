@@ -1,0 +1,8 @@
+[Core]
+Name = OFX Parse
+Module = ofx
+
+[Documentation]
+Author = Chris Giacofei
+Version = 0.1
+Description = Parse ofx file into transaction object list.

@@ -9,9 +9,10 @@ import hashlib
 from ofxtools import OFXTree
 import sys
 
+from pyledgertools.journal import Transaction, Posting
 
-now = datetime.now
-strftime = datetime.strftime
+
+
 
 
 def build_journal(ofx_file, config_accts):
@@ -35,7 +36,7 @@ def build_journal(ofx_file, config_accts):
 
         acct_options = find_in_config(config_accts, 'acctnum', account)
 
-        a_assert = Allocation(
+        a_assert = Posting(
             account=acct_options['from'],
             amount=balance,
             currency=currency,
@@ -45,7 +46,7 @@ def build_journal(ofx_file, config_accts):
         t_assert = Transaction(
             date=stmnt_date,
             payee='Balance for {}-{}'.format(ofx_obj.sonrs.org, account),
-            allocations=[a_assert]
+            postings=[a_assert]
         )
 
         balance_assertions.append(t_assert)
@@ -69,7 +70,7 @@ def build_journal(ofx_file, config_accts):
             meta.append(('UUID', hash_obj.hexdigest()))
             meta.append(('ImportDate', strftime(now(), '%Y-%m-%d')))
 
-            a_tran = Allocation(
+            a_tran = Posting(
                 account=acct_options['from'],
                 amount=amount
             )
@@ -77,7 +78,7 @@ def build_journal(ofx_file, config_accts):
             t_tran = Transaction(
                 date=trn_date,
                 payee=payee,
-                allocations=[a_tran],
+                postings=[a_tran],
                 metadata=meta,
                 account=account
             )
@@ -114,7 +115,7 @@ def export_journal(balances, transactions, **kwargs):
 
     Parameters:
         balanes (list): List of :obj:`Transaction` objects containing
-            :obj:`Allocation` objects with `assertion` flag set to ``True``.
+            :obj:`Posting` objects with `assertion` flag set to ``True``.
         transactions (list): :obj:`Transaction` objects to export.
 
     Keyword Args:

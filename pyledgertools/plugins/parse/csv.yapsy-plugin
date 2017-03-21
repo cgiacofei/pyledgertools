@@ -1,0 +1,8 @@
+[Core]
+Name = CSV Parse
+Module = csv
+
+[Documentation]
+Author = Chris Giacofei
+Version = 0.1
+Description = Parse csv file into transaction object list.
