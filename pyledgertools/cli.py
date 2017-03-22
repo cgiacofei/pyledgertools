@@ -94,16 +94,18 @@ def interactive():
     # -------------------------------------------------------------------------
     conf = dict(config.items(args.account))
     try:
-        global_conf = dict(config.items(conf['global']))
-        conf.update(global_conf)
+        base_conf = dict(config.items(conf['global']))
     except KeyError:
-        pass
+        base_conf = {}
 
     try:
         parent_conf = dict(config.items(conf['parent']))
-        conf.update(parent_conf)
     except KeyError:
-        pass
+        parent_conf = {}
+
+    base_conf.update(parent_conf)
+    base_conf.update(conf)
+    conf = base_conf
 
     getter = get_plugin(manager, conf['downloader'])
     parser = get_plugin(manager, conf['parser'])
