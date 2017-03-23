@@ -72,7 +72,8 @@ class ParseOFX(IPlugin):
                 # Build md5 Hash of transaction
                 check_hash = trn_id + trn_date + payee + str(amount)
                 hash_obj = hashlib.md5(check_hash.encode())
-                meta.append(('UUID', hash_obj.hexdigest()))
+                uuid = hash_obj.hexdigest()
+                meta.append(('UUID', uuid))
                 meta.append(('ImportDate', strftime(now(), '%Y-%m-%d')))
 
                 a_tran = Posting(
@@ -85,7 +86,8 @@ class ParseOFX(IPlugin):
                     payee=payee,
                     postings=[a_tran],
                     metadata=meta,
-                    account=account
+                    account=account,
+                    uuid=uuid
                 )
 
                 # Need to process transactions further here

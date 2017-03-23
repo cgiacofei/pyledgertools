@@ -4,7 +4,9 @@ from argparse import ArgumentParser
 from configparser import ConfigParser
 import os
 from os.path import expanduser
+import re
 import sys
+from subprocess import Popen, PIPE
 from yapsy.PluginManager import PluginManager
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -45,6 +47,18 @@ def get_args():
         default=None,
         help='Config section to use for import.'
     )
+    parser.add_argument(
+        '-s', '--dtstart',
+        dest='dtstart',
+        default='20170301',
+        help='Date to start pulling transactions from.'
+    )
+    parser.add_argument(
+        '-e', '--dtend',
+        dest='dtend',
+        default='20170320',
+        help='Date to start pulling transactions from.'
+    )
     args = parser.parse_args()
 
     return args
@@ -63,10 +77,7 @@ def interactive():
     """Run the command line interface."""
     # Load Plugins
     manager = PluginManager()
-    manager.setPluginPlaces([
-        os.path.join(DIR_PATH, 'plugins')
-    ])
-
+    manager.setPluginPlaces([os.path.join(DIR_PATH, 'plugins')])
     manager.collectPlugins()
 
     # Load classification plugins
@@ -90,32 +101,40 @@ def interactive():
     transactions = []
 
     # -------------------------------------------------------------------------
-    # Test suntrust
+    # Start processing
     # -------------------------------------------------------------------------
-    conf = dict(config.items(args.account))
     try:
-        base_conf = dict(config.items(conf['global']))
+        global_conf = dict(config.items('global'))
     except KeyError:
-        base_conf = {}
+        global_conf = {}
 
-    try:
-        parent_conf = dict(config.items(conf['parent']))
-    except KeyError:
-        parent_conf = {}
+    accounts = args.account.split(',')
 
-    base_conf.update(parent_conf)
-    base_conf.update(conf)
-    conf = base_conf
+    for account in accounts:
+        base_conf = global_conf
+        conf = dict(config.items(account))
+        try:
+            parent_conf = dict(config.items(conf['parent']))
+        except KeyError:
+            parent_conf = {}
 
-    getter = get_plugin(manager, conf['downloader'])
-    parser = get_plugin(manager, conf['parser'])
+        base_conf.update(parent_conf)
+        base_conf.update(conf)
+        # Strip empty args
+        cli_options = dict((k, v) for k, v in vars(args).items() if v)
+        base_conf.update(cli_options)
+        conf = base_conf
 
-    if args.ofx_file is None:
-        file_path = getter.download(conf)
-    else:
-        file_path = args.ofx_file
+        # Get downloader and parser plugins fromthe config.
+        getter = get_plugin(manager, conf['downloader'])
+        parser = get_plugin(manager, conf['parser'])
 
-    bal, trans = parser.build_journal(file_path, conf)
+        if args.ofx_file is None:
+            file_path = getter.download(conf)
+        else:
+            file_path = args.ofx_file
+
+        bal, trans = parser.build_journal(file_path, conf)
 
     balances = balances + bal
     transactions = transactions + trans
@@ -125,84 +144,92 @@ def interactive():
     if args.ledger_file is not None:
         interactive_classifier = bayes.setup(journal_file=args.ledger_file)
     else:
-        interactive_classifier = bayes.setup()
+        process = Popen(['ledger', 'print'], stdout=PIPE)
+        journal, err = process.communicate()
+        interactive_classifier = bayes.setup(journal_file=journal)
 
-    if args.rule_file is not None:
-        rules = rule.build_rules(args.rule_file)
-    else:
+    try:
+        rules = rule.build_rules(conf['rules_file'])
+    except KeyError:
         rules = None
 
+    # Make list of existing UUID's
+    regex = 'UUID:\s+([a-z0-9]+)'
+    process = Popen(['ledger', '--format', '"%N\n"', 'reg'], stdout=PIPE)
+    ledger_data, err = process.communicate()
+    uuid_results = re.findall(regex, str(ledger_data))
+
     for transaction in transactions:
-        match = None
-        result = None
-        text = transaction.payee
-        amount = transaction.postings[0].amount
-        currency = transaction.postings[0].currency
+        if transaction.uuid not in uuid_results:
+            match = None
+            result = None
+            selected_account = None
 
-        for entry in rules.keys():
-            match = rule.walk_rules(rules[entry]['conditions'], transaction)
-            if match:
-                found_rule = rules[entry]
-                break
-                sys.exit()
-            else:
-                found_rule = {}
+            text = transaction.payee
+            amount = transaction.postings[0].amount
+            currency = transaction.postings[0].currency
 
-        try:
-            skip = found_rule['ignore']
-        except KeyError:
-            skip = False
-
-        if (args.rule_file is None or found_rule == {}) and skip is False:
-            result = interactive_classifier.classify(text, method='bayes')
-
-        print('')
-        print('=' * 80)
-        print(transaction.to_string())
-        print('')
-        if skip is True:
-            print('Skip transfer Deposit')
-            pass
-        elif result is None:
-            print('No matches found, enter an account name:')
-            account = input(': ')
-            print('')
-        elif isinstance(result, list):
-            for i, acc in enumerate(result[:5]):
-                print('[{}] {}'.format(i, acc))
-            print('[e] Enter New Account')
-            print('[s] Skip Transaction')
-
-            user_in = input('Enter Selection: ').strip()
+            for entry in rules.keys():
+                match = rule.walk_rules(rules[entry]['conditions'], transaction)
+                if match:
+                    found_rule = rules[entry]
+                    break
+                    sys.exit()
+                else:
+                    found_rule = {}
 
             try:
-                selection = int(user_in)
-                account = result[selection][0]
+                skip = found_rule['ignore']
+            except KeyError:
+                skip = False
 
-            except ValueError:
-                if user_in == 'e':
-                    account = input('Enter account name: ').strip()
+            if (conf['rules_file'] is None or found_rule == {}) and skip is False:
+                result = interactive_classifier.classify(text, method='bayes')
 
-                else:
-                    account = None
-
-        if account:
-            print('Using ', account)
             print('')
-
-            interactive_classifier.update(text, account)
-
-            transaction.add(account, amount * -1, currency)
-
-            print('---------------------')
+            print('=' * 80)
             print(transaction.to_string())
-            with open(conf['ledger_file'], 'a') as outfile:
-                print(transaction.to_string(), '\n', file=outfile)
+            print('')
+            if skip is True:
+                print('Skip transfer Deposit')
+                pass
+            elif result is None:
+                print('No matches found, enter an account name:')
+                selected_account = input(': ')
+                print('')
+            elif isinstance(result, list):
+                for i, acc in enumerate(result[:5]):
+                    print('[{}] {}'.format(i, acc))
+                print('[e] Enter New Account')
+                print('[s] Skip Transaction')
 
-            account = None
+                user_in = input('Enter Selection: ').strip()
 
-        print('')
-        print('=' * 80)
+                try:
+                    selection = int(user_in)
+                    selected_account = result[selection][0]
+
+                except ValueError:
+                    if user_in == 'e':
+                        selected_account = input('Enter account name: ').strip()
+
+            if selected_account:
+                print('Using ', selected_account)
+                print('')
+
+                interactive_classifier.update(text, selected_account)
+
+                transaction.add(selected_account, amount * -1, currency)
+
+                print('---------------------')
+                print(transaction.to_string())
+                with open(conf['ledger_file'], 'a') as outfile:
+                    print(transaction.to_string(), '\n', file=outfile)
+
+                selected_account = None
+
+            print('')
+            print('=' * 80)
 
 
 if __name__ == "__main__":

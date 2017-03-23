@@ -3,11 +3,7 @@
 
 from __future__ import print_function
 
-from configparser import NoOptionError
 from datetime import datetime
-import hashlib
-from ofxtools import OFXTree
-import sys
 
 
 now = datetime.now
@@ -154,6 +150,7 @@ class Transaction(object):
         self.bankid = kwargs.get('bankid', None)
         self.acctid = kwargs.get('acctid', None)
         self.account = kwargs.get('account', '')
+        self.uuid = kwargs.get('uuid', '')
 
     def to_string(self, width=80, indent=4):
         """Transaction to string.

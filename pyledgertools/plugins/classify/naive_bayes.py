@@ -12,15 +12,13 @@ except ImportError:
     from fractions import gcd
 
 from operator import itemgetter
-import os
 import re
-import yaml
 
-DOLLAR_REGEX = '([\$A_Z]+) ([\-0-9]+.[0-9]{2,2})'
+DOLLAR_REGEX = '([\$A-Z]+)?\s?([\-0-9]+.[0-9]{2,2})?'
 
 # Allocation RegEx
-ALLOC_REGEX = '\s+([A-Za-z0-9:_-]* ?[A-Za-z0-9:_-]*)\s{2,}' + DOLLAR_REGEX
-TRANS_REGEX = '^\d{4,4}-\d{2,2}-\d{2,2}\s+[!\*]?\s?(?P<payee>[&#\w\s]+)'
+ALLOC_REGEX = '\s+([A-Za-z0-9:_-]* ?[A-Za-z0-9:_-]*)\s*' + DOLLAR_REGEX
+TRANS_REGEX = '^\d{4,4}[/-]{1,1}\d{2,2}[/-]{1,1}\d{2,2}\s+[!\*]?\s?(?P<payee>[&#\w\s]+)'
 
 
 def GCD(dollars):
@@ -45,24 +43,20 @@ def GCD(dollars):
 
 def train_journal(journal_string):
     """Generate training data from ledger entries."""
-
-    blocks = [x.split('\n') for x in journal_string.split('\n\n')]
-
+    blocks = [x.split('\n') for x in journal_string.decode('utf-8').split('\n\n')]
     training_data = []
 
     for tran in blocks:
-        tran = [x for x in tran if x != '' and not x.startswith(';')]
-
+        tran = [x.split('=')[0] for x in tran if x != '' and not re.match('\s*;',x)]
         if len(tran) > 0:
             result = re.search(TRANS_REGEX, tran[0])
             if result:
                 payee = result.group('payee')
 
             result = re.findall(ALLOC_REGEX, ' '.join(tran[1:]))
-
-            if len(result) > 0:
+            if len(result) > 1:
                 alloc_list = list(result[1])
-                alloc_list[2] = float(alloc_list[2])
+                alloc_list[2] = float(result[0][2])
                 alloc_list[0] = alloc_list[0].strip()
 
                 training_data.append([payee] + alloc_list)
@@ -90,8 +84,7 @@ class Classifier(object):
     class NotImplemented(Exception):
         pass
 
-
-    def __init__(self, journal_file=None, rules=None):
+    def __init__(self, journal=None):
         """Classifer initialization.
 
         Parameters:
@@ -100,12 +93,8 @@ class Classifier(object):
         """
         self._tknizer = tokenizer.Tokenizer(signs_to_remove=['?!%.'])
         self._trainer = Trainer(self._tknizer)
-
-        if journal_file is not None:
-            with open(journal_file) as journal:
-                journal_string = journal.read()
-
-            journal_data = train_journal(journal_string)
+        if journal is not None:
+            journal_data = train_journal(journal)
 
             for group in journal_data:
                 # 0: Allocation account.
@@ -122,23 +111,6 @@ class Classifier(object):
             )
         else:
             self._classifier = None
-
-        if rules is not None:
-            # Process rules file
-            if os.path.isfile(rules):
-                rules = yaml.load(open(rules))
-
-            # If directory is given find all .rules files in directory
-            # and build a single dictionary from their contents.
-            elif os.path.isdir(rules):
-                self._rules = {}
-                for root, dirs, files in os.walk(rules):
-                    for file in files:
-                        if file.endswith('.rules'):
-                            f = yaml.load(open(os.path.join(root, file)))
-                            self._rules.update(f)
-        else:
-            self._rules = None
 
     def update(self, text, category):
         """Update training data with new examples.
@@ -181,5 +153,5 @@ class Classifier(object):
 
 
 class PluginLoader(IPlugin):
-    def setup(self, journal_file=None, rules=None):
-        return Classifier(journal_file, rules)
+    def setup(self, journal_file=None):
+        return Classifier(journal_file)

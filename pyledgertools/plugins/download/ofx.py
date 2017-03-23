@@ -5,8 +5,8 @@ from ofxtools.Types import DateTime
 from yapsy.IPlugin import IPlugin
 
 
-def make_date_kwargs(**kwargs):
-    return {k:DateTime().convert(v) for k,v in kwargs.items() if k.startswith('dt')}
+def make_date_kwargs(config):
+    return {k:DateTime().convert(v) for k,v in config.items() if k.startswith('dt')}
 
 
 class OFXDownload(IPlugin):
@@ -25,7 +25,7 @@ class OFXDownload(IPlugin):
         )
 
         account = [BankAcct(config['bankid'], config['acctnum'], config['type'])]
-        kwargs = make_date_kwargs(dtstart='20170101', dtend='20170320')
+        kwargs = make_date_kwargs(config)
 
         request = client.statement_request(
             config['ofxuser'],
