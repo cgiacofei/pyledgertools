@@ -1,0 +1,3 @@
+[core]
+name: Scrape Suntrust
+module: suntrust
