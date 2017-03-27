@@ -87,13 +87,13 @@ def interactive():
     args = get_args()
 
     # Load Config file
-    if args.config:
+    if args.config is not None:
         c_path = args.config
     else:
         c_path = os.path.join(
             expanduser("~"), '.config', 'ofxtools', 'ofxget.conf'
         )
-
+        print(c_path)
     config = ConfigParser()
     config.read(c_path)
 
