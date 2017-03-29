@@ -8,6 +8,7 @@ import re
 import sys
 from subprocess import Popen, PIPE
 from yapsy.PluginManager import PluginManager
+import yaml
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -86,16 +87,17 @@ def interactive():
 
     args = get_args()
 
+
     # Load Config file
     if args.config is not None:
         c_path = args.config
     else:
         c_path = os.path.join(
-            expanduser("~"), '.config', 'ofxtools', 'ofxget.conf'
+            expanduser("~"), '.config', 'ledgertools', 'ledgertools.yaml'
         )
-        print(c_path)
-    config = ConfigParser()
-    config.read(c_path)
+
+    with open(c_path, 'r') as f:
+        config = yaml.load(f)
 
     balances = []
     transactions = []
@@ -103,20 +105,14 @@ def interactive():
     # -------------------------------------------------------------------------
     # Start processing
     # -------------------------------------------------------------------------
-    try:
-        global_conf = dict(config.items('global'))
-    except KeyError:
-        global_conf = {}
+    global_conf = config.get('global', {})
 
     accounts = args.account.split(',')
 
     for account in accounts:
         base_conf = global_conf
-        conf = dict(config.items(account))
-        try:
-            parent_conf = dict(config.items(conf['parent']))
-        except KeyError:
-            parent_conf = {}
+        conf = config.get(account, None)
+        parent_conf = config.get(conf.get('parent', 'NaN'), {})
 
         base_conf.update(parent_conf)
         base_conf.update(conf)
