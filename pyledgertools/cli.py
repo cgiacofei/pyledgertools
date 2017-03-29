@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+"""Command line interface for ledgertools package."""
 
 from argparse import ArgumentParser
 from configparser import ConfigParser
@@ -62,7 +63,7 @@ def get_args():
     )
     args = parser.parse_args()
 
-    return args
+    return dict((k, v) for k, v in vars(args).items() if v)
 
 
 def get_plugin(manager, name):
@@ -76,6 +77,11 @@ def get_plugin(manager, name):
 
 def interactive():
     """Run the command line interface."""
+
+    default_config = os.path.join(
+        expanduser("~"), '.config', 'ledgertools', 'ledgertools.yaml'
+    )
+
     # Load Plugins
     manager = PluginManager()
     manager.setPluginPlaces([os.path.join(DIR_PATH, 'plugins')])
@@ -85,16 +91,10 @@ def interactive():
     rule = get_plugin(manager, 'Rule Based Classifier')
     bayes = get_plugin(manager, 'Naive Bayes Classifier')
 
-    args = get_args()
+    # Load command line options.
+    cli_options = get_args()
 
-
-    # Load Config file
-    if args.config is not None:
-        c_path = args.config
-    else:
-        c_path = os.path.join(
-            expanduser("~"), '.config', 'ledgertools', 'ledgertools.yaml'
-        )
+    c_path = cli_options.get('config', default_config)
 
     with open(c_path, 'r') as f:
         config = yaml.load(f)
@@ -116,8 +116,6 @@ def interactive():
 
         base_conf.update(parent_conf)
         base_conf.update(conf)
-        # Strip empty args
-        cli_options = dict((k, v) for k, v in vars(args).items() if v)
         base_conf.update(cli_options)
         conf = base_conf
 
