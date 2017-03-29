@@ -232,6 +232,8 @@ class RuleClassifier(IPlugin):
 
     def build_rules(self, rule_loc):
         """Build rules from file or directory."""
+        rules = None
+
         if os.path.isfile(rule_loc):
             rules = yaml.load(open(rule_loc))
 
@@ -246,12 +248,24 @@ class RuleClassifier(IPlugin):
 
         return rules
 
-    def walk_rules(self, conditions, trans_obj=None, logic=None):
+    def find_matching_rule(self, rules, trans_obj):
+        """Find rule that matches a transaction."""
+        found_rule = {}
+
+        for rule in rules.keys():
+            match = self._walk_rules(rules[rule]['conditions'], trans_obj)
+            if match:
+                found_rule = rules[rule]
+                break
+
+        return found_rule
+
+    def _walk_rules(self, conditions, trans_obj=None, logic=None):
         results = []
         for condition in conditions:
             if isinstance(condition, dict):
                 new_logic = list(condition.keys())[0]
-                res = self.walk_rules(condition[new_logic], trans_obj, new_logic)
+                res = self._walk_rules(condition[new_logic], trans_obj, new_logic)
             if isinstance(condition, str):
                 res = self.check_condition(condition, trans_obj)
 

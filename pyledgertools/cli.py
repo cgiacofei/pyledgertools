@@ -7,7 +7,8 @@ import os
 from os.path import expanduser
 import re
 import sys
-from subprocess import Popen, PIPE
+import tempfile
+from subprocess import Popen, PIPE, call
 from yapsy.PluginManager import PluginManager
 import yaml
 
@@ -89,6 +90,35 @@ def read_ledger(journal=None):
     return journal
 
 
+def list_uuids(journal=None):
+    """Pull list of UUID's from ledger journal."""
+
+    if journal is None:
+        cmd = ['ledger', '--format', '"%N\n"', 'reg']
+    else:
+        cmd = ['ledger', '-f', journal, '--format', '"%N\n"', 'reg']
+
+    # Make list of existing UUID's
+    regex = 'UUID:\s+([a-z0-9]+)'
+    process = Popen(cmd, stdout=PIPE)
+    ledger_data, err = process.communicate()
+    return re.findall(regex, str(ledger_data))
+
+
+def vim_input(text=''):
+    """Use editor for input."""
+    EDITOR = os.environ.get('EDITOR','vim')
+
+    with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
+        tf.write(text)
+        tf.flush()
+        call([EDITOR, tf.name])
+
+        tf.seek(0)
+        for line in tf.readlines():
+            if not line.startswith('#') and line.strip() != '':
+                return line.strip()
+
 def interactive():
     """Run the command line interface."""
 
@@ -147,20 +177,11 @@ def interactive():
 
     learning_file = conf.get('journal_file', read_ledger())
     interactive_classifier = bayes.setup(journal_file=learning_file)
-
-    try:
-        rules = rule.build_rules(conf['rules_file'])
-    except KeyError:
-        rules = None
-
-    # Make list of existing UUID's
-    regex = 'UUID:\s+([a-z0-9]+)'
-    process = Popen(['ledger', '--format', '"%N\n"', 'reg'], stdout=PIPE)
-    ledger_data, err = process.communicate()
-    uuid_results = re.findall(regex, str(ledger_data))
+    rules = rule.build_rules(conf.get('rules_file', None))
+    uuids = list_uuids()
 
     for transaction in transactions:
-        if transaction.uuid not in uuid_results:
+        if transaction.uuid not in uuids:
             match = None
             result = None
             selected_account = None
@@ -169,21 +190,14 @@ def interactive():
             amount = transaction.postings[0].amount
             currency = transaction.postings[0].currency
 
-            for entry in rules.keys():
-                match = rule.walk_rules(rules[entry]['conditions'], transaction)
-                if match:
-                    found_rule = rules[entry]
-                    break
-                    sys.exit()
-                else:
-                    found_rule = {}
+            found_rule = rule.find_matching_rule(rules, transaction)
 
-            try:
-                skip = found_rule['ignore']
-            except KeyError:
-                skip = False
+            # Check for keys in rule
+            skip = found_rule.get('ignore', False)
+            process = found_rule.get('process', None)
+            allocations = found_rule.get('allocations', None)
 
-            if (conf['rules_file'] is None or found_rule == {}) and skip is False:
+            if all(x in [False, None] for x in [skip, process, allocations]):
                 result = interactive_classifier.classify(text, method='bayes')
 
             print('')
@@ -211,7 +225,9 @@ def interactive():
 
                 except ValueError:
                     if user_in == 'e':
-                        selected_account = input('Enter account name: ').strip()
+                        helper_text = '# {}\n# {} {}\n# Enter account name:\n'
+                        helper_text = helper_text.format(text, currency, amount)
+                        selected_account = vim_input(helper_text.encode()).strip()
 
             if selected_account:
                 print('Using ', selected_account)
