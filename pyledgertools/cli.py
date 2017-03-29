@@ -105,19 +105,23 @@ def list_uuids(journal=None):
     return re.findall(regex, str(ledger_data))
 
 
-def vim_input(text=''):
+def vim_input(text='', offset=None):
     """Use editor for input."""
     EDITOR = os.environ.get('EDITOR','vim')
 
     with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
         tf.write(text)
         tf.flush()
-        call([EDITOR, tf.name])
+        if offset:
+            call([EDITOR, '+' + str(offset), tf.name])
+        else:
+            call([EDITOR, tf.name])
 
         tf.seek(0)
         for line in tf.readlines():
-            if not line.startswith('#') and line.strip() != '':
-                return line.strip()
+            if not line.startswith(b'#') and line.strip() != '':
+                return line.strip().decode('utf-8')
+
 
 def interactive():
     """Run the command line interface."""
@@ -225,9 +229,9 @@ def interactive():
 
                 except ValueError:
                     if user_in == 'e':
-                        helper_text = '# {}\n# {} {}\n# Enter account name:\n'
+                        helper_text = '# {}\n# {} {}\n# Enter account name:\n\n'
                         helper_text = helper_text.format(text, currency, amount)
-                        selected_account = vim_input(helper_text.encode()).strip()
+                        selected_account = vim_input(helper_text.encode(), 4).strip()
 
             if selected_account:
                 print('Using ', selected_account)
