@@ -1,0 +1,8 @@
+[Core]
+Name = process_adp_paycheck
+Module = adp
+
+[Documentation]
+Author = Chris Giacofei
+Version = 0.1
+Description = Parse ADP paystub as transaction.
