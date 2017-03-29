@@ -27,7 +27,7 @@ def get_args():
     )
     parser.add_argument(
         '-l', '--ledger-file',
-        dest='ledger_file',
+        dest='journal_file',
         default=None,
         help='Ledger file to check transactions against.'
     )
@@ -145,7 +145,7 @@ def interactive():
     transactions = transactions + trans
     transactions.sort(key=lambda x: x.date)
 
-    learning_file = conf.get('ledger_file', read_ledger())
+    learning_file = conf.get('journal_file', read_ledger())
     interactive_classifier = bayes.setup(journal_file=learning_file)
 
     try:
