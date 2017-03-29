@@ -12,6 +12,8 @@ from subprocess import Popen, PIPE, call
 from yapsy.PluginManager import PluginManager
 import yaml
 
+from pyledgertools.strings import UI, Info, Prompts
+
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -107,10 +109,10 @@ def list_uuids(journal=None):
 
 def vim_input(text='', offset=None):
     """Use editor for input."""
-    EDITOR = os.environ.get('EDITOR','vim')
+    EDITOR = os.environ.get('EDITOR', 'vim')
 
-    with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
-        tf.write(text)
+    with tempfile.NamedTemporaryFile(suffix='.ledger') as tf:
+        tf.write(text.encode())
         tf.flush()
         if offset:
             call([EDITOR, '+' + str(offset), tf.name])
@@ -186,7 +188,6 @@ def interactive():
 
     for transaction in transactions:
         if transaction.uuid not in uuids:
-            match = None
             result = None
             selected_account = None
 
@@ -205,43 +206,44 @@ def interactive():
                 result = interactive_classifier.classify(text, method='bayes')
 
             print('')
-            print('=' * 80)
+            print(UI.double_line)
             print(transaction.to_string())
             print('')
             if skip is True:
-                print('Skip transfer Deposit')
+                print(Info.skip_deposit_side)
                 pass
             elif result is None:
-                print('No matches found, enter an account name:')
+                print(Prompts.needs_manual_entry)
                 selected_account = input(': ')
                 print('')
             elif isinstance(result, list):
                 for i, acc in enumerate(result[:5]):
-                    print('[{}] {}'.format(i, acc))
-                print('[e] Enter New Account')
-                print('[s] Skip Transaction')
+                    print(Prompts.bayes_result.format(i, acc))
+                print(Prompts.opt_enter)
+                print(Prompts.opt_skip)
 
-                user_in = input('Enter Selection: ').strip()
+                user_in = input(Prompts.enter_select).strip()
 
                 try:
                     selection = int(user_in)
                     selected_account = result[selection][0]
 
                 except ValueError:
-                    if user_in == 'e':
-                        helper_text = '# {}\n# {} {}\n# Enter account name:\n\n'
-                        helper_text = helper_text.format(text, currency, amount)
-                        selected_account = vim_input(helper_text.encode(), 4).strip()
+                    if user_in == Prompts.opt_e_key:
+                        selected_account = vim_input(
+                            Info.vim_helper.format(text, currency, amount),
+                            offset=4
+                        )
+                        selected_account = selected_account.strip() 
 
             if selected_account:
-                print('Using ', selected_account)
                 print('')
 
                 interactive_classifier.update(text, selected_account)
 
                 transaction.add(selected_account, amount * -1, currency)
 
-                print('---------------------')
+                print(UI.single_line)
                 print(transaction.to_string())
                 with open(conf['ledger_file'], 'a') as outfile:
                     print(transaction.to_string(), '\n', file=outfile)
@@ -249,7 +251,7 @@ def interactive():
                 selected_account = None
 
             print('')
-            print('=' * 80)
+            print(UI.double_line)
 
 
 if __name__ == "__main__":
