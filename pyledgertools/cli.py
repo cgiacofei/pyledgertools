@@ -75,6 +75,20 @@ def get_plugin(manager, name):
     return None
 
 
+def read_ledger(journal=None):
+    """Read a ledger journal and return formatted transactions."""
+
+    if journal is None:
+        cmd = ['ledger', 'print']
+    else:
+        cmd = ['ledger', '-f', journal, 'print']
+
+    process = Popen(cmd, stdout=PIPE)
+    journal, err = process.communicate()
+
+    return journal
+
+
 def interactive():
     """Run the command line interface."""
 
@@ -107,7 +121,7 @@ def interactive():
     # -------------------------------------------------------------------------
     global_conf = config.get('global', {})
 
-    accounts = args.account.split(',')
+    accounts = cli_options['account'].split(',')
 
     for account in accounts:
         base_conf = global_conf
@@ -123,24 +137,16 @@ def interactive():
         getter = get_plugin(manager, conf['downloader'])
         parser = get_plugin(manager, conf['parser'])
 
-        if args.ofx_file is None:
-            file_path = getter.download(conf)
-        else:
-            file_path = args.ofx_file
+        file_path = conf.get('ofx_file', getter.download(conf))
 
         bal, trans = parser.build_journal(file_path, conf)
 
     balances = balances + bal
     transactions = transactions + trans
-
     transactions.sort(key=lambda x: x.date)
 
-    if args.ledger_file is not None:
-        interactive_classifier = bayes.setup(journal_file=args.ledger_file)
-    else:
-        process = Popen(['ledger', 'print'], stdout=PIPE)
-        journal, err = process.communicate()
-        interactive_classifier = bayes.setup(journal_file=journal)
+    learning_file = conf.get('ledger_file', read_ledger())
+    interactive_classifier = bayes.setup(journal_file=learning_file)
 
     try:
         rules = rule.build_rules(conf['rules_file'])

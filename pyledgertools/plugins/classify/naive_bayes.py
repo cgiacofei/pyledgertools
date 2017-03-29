@@ -88,8 +88,7 @@ class Classifier(object):
         """Classifer initialization.
 
         Parameters:
-            journal_file (str): Path to journal file to import.
-            rules_file (str): Path to rules.
+            journal_file (str): Journal file string to import.
         """
         self._tknizer = tokenizer.Tokenizer(signs_to_remove=['?!%.'])
         self._trainer = Trainer(self._tknizer)
