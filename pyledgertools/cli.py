@@ -109,15 +109,15 @@ def list_uuids(journal=None):
 
 def vim_input(text='', offset=None):
     """Use editor for input."""
-    EDITOR = os.environ.get('EDITOR', 'vim')
+    editor = os.environ.get('EDITOR', 'vim')
 
     with tempfile.NamedTemporaryFile(suffix='.ledger') as tf:
         tf.write(text.encode())
         tf.flush()
         if offset:
-            call([EDITOR, '+' + str(offset), tf.name])
+            call([editor, '+' + str(offset), tf.name])
         else:
-            call([EDITOR, tf.name])
+            call([editor, tf.name])
 
         tf.seek(0)
         for line in tf.readlines():
@@ -205,10 +205,9 @@ def interactive():
             if all(x in [False, None] for x in [skip, process, allocations]):
                 result = interactive_classifier.classify(text, method='bayes')
 
-            print('')
-            print(UI.double_line)
-            print(transaction.to_string())
-            print('')
+            print('\n', UI.double_line)
+            print(transaction.to_string(), '\n')
+
             if skip is True:
                 print(Info.skip_deposit_side)
                 pass
@@ -237,21 +236,17 @@ def interactive():
                         selected_account = selected_account.strip() 
 
             if selected_account:
-                print('')
-
                 interactive_classifier.update(text, selected_account)
-
                 transaction.add(selected_account, amount * -1, currency)
 
-                print(UI.single_line)
+                print('\n', UI.single_line)
                 print(transaction.to_string())
                 with open(conf['ledger_file'], 'a') as outfile:
                     print(transaction.to_string(), '\n', file=outfile)
 
                 selected_account = None
 
-            print('')
-            print(UI.double_line)
+            print('\n', UI.double_line)
 
 
 if __name__ == "__main__":
