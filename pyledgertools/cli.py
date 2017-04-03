@@ -23,8 +23,8 @@ def get_args():
     parser = ArgumentParser()
 
     parser.add_argument(
-        '-i', '--input-ofx',
-        dest='ofx_file',
+        '-i', '--input-file',
+        dest='input_file',
         default=None,
         help='.OFX file to parse'
     )
@@ -170,7 +170,7 @@ def interactive():
         getter = get_plugin(manager, conf['downloader'])
         parser = get_plugin(manager, conf['parser'])
 
-        file_path = conf.get('ofx_file', getter.download(conf))
+        file_path = conf.get('input_file', getter.download(conf))
 
         balances, transactions = parser.build_journal(file_path, conf)
 
