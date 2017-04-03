@@ -149,9 +149,6 @@ def interactive():
     with open(c_path, 'r') as f:
         config = yaml.load(f)
 
-    balances = []
-    transactions = []
-
     # -------------------------------------------------------------------------
     # Start processing
     # -------------------------------------------------------------------------
@@ -175,78 +172,76 @@ def interactive():
 
         file_path = conf.get('ofx_file', getter.download(conf))
 
-        bal, trans = parser.build_journal(file_path, conf)
+        balances, transactions = parser.build_journal(file_path, conf)
 
-    balances = balances + bal
-    transactions = transactions + trans
-    transactions.sort(key=lambda x: x.date)
+        transactions.sort(key=lambda x: x.date)
 
-    learning_file = conf.get('journal_file', read_ledger())
-    interactive_classifier = bayes.setup(journal_file=learning_file)
-    rules = rule.build_rules(conf.get('rules_file', None))
-    uuids = list_uuids()
+        learning_file = conf.get('journal_file', read_ledger())
+        interactive_classifier = bayes.setup(journal_file=learning_file)
+        rules = rule.build_rules(conf.get('rules_file', None))
+        uuids = list_uuids()
 
-    for transaction in transactions:
-        if transaction.uuid not in uuids:
-            result = None
-            selected_account = None
-
-            text = transaction.payee
-            amount = transaction.postings[0].amount
-            currency = transaction.postings[0].currency
-
-            found_rule = rule.find_matching_rule(rules, transaction)
-
-            # Check for keys in rule
-            skip = found_rule.get('ignore', False)
-            process = found_rule.get('process', None)
-            allocations = found_rule.get('allocations', None)
-
-            if all(x in [False, None] for x in [skip, process, allocations]):
-                result = interactive_classifier.classify(text, method='bayes')
-
-            print('\n', UI.double_line)
-            print(transaction.to_string(), '\n')
-
-            if skip is True:
-                print(Info.skip_deposit_side)
-                pass
-            elif result is None:
-                print(Prompts.needs_manual_entry)
-                selected_account = input(': ')
-                print('')
-            elif isinstance(result, list):
-                for i, acc in enumerate(result[:5]):
-                    print(Prompts.bayes_result.format(i, acc))
-                print(Prompts.opt_enter)
-                print(Prompts.opt_skip)
-
-                user_in = input(Prompts.enter_select).strip()
-
-                try:
-                    selection = int(user_in)
-                    selected_account = result[selection][0]
-
-                except ValueError:
-                    if user_in == Prompts.opt_e_key:
-                        selected_account = vim_input(
-                            Info.vim_helper.format(text, currency, amount),
-                            offset=4
-                        )
-                        selected_account = selected_account.strip() 
-
-            if selected_account:
-                interactive_classifier.update(text, selected_account)
-                transaction.add(selected_account, amount * -1, currency)
-
-                print('\n', UI.single_line)
-                print(transaction.to_string())
-                with open(conf['ledger_file'], 'a') as outfile:
-                    print(transaction.to_string(), '\n', file=outfile)
-
+        for transaction in transactions:
+            if transaction.uuid not in uuids:
+                result = None
                 selected_account = None
 
-            print('\n', UI.double_line)
+                text = transaction.payee
+                amount = transaction.postings[0].amount
+                currency = transaction.postings[0].currency
+
+                found_rule = rule.find_matching_rule(rules, transaction)
+
+                # Check for keys in rule
+                skip = found_rule.get('ignore', False)
+                process = found_rule.get('process', None)
+                allocations = found_rule.get('allocations', None)
+
+                if all(x in [False, None] for x in [skip, process, allocations]):
+                    result = interactive_classifier.classify(text, method='bayes')
+
+                print('\n', UI.double_line)
+                print(transaction.to_string(), '\n')
+
+                if skip is True:
+                    print(Info.skip_deposit_side)
+                    pass
+                elif result is None:
+                    print(Prompts.needs_manual_entry)
+                    selected_account = input(': ')
+                    print('')
+                elif isinstance(result, list):
+                    for i, acc in enumerate(result[:5]):
+                        print(Prompts.bayes_result.format(i, acc))
+                    print(Prompts.opt_enter)
+                    print(Prompts.opt_skip)
+
+                    user_in = input(Prompts.enter_select).strip()
+
+                    try:
+                        selection = int(user_in)
+                        selected_account = result[selection][0]
+
+                    except ValueError:
+                        if user_in == Prompts.opt_e_key:
+                            selected_account = vim_input(
+                                Info.vim_helper.format(text, currency, amount),
+                                offset=4
+                            )
+                            selected_account = selected_account.strip() 
+
+                if selected_account:
+                    interactive_classifier.update(text, selected_account)
+                    transaction.add(selected_account, amount * -1, currency)
+
+                    print('\n', UI.single_line)
+                    print(transaction.to_string())
+                    with open(conf['ledger_file'], 'a') as outfile:
+                        print(transaction.to_string(), '\n', file=outfile)
+
+                    selected_account = None
+
+                print('\n', UI.double_line)
 
 
 if __name__ == "__main__":
