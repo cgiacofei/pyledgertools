@@ -11,7 +11,7 @@ import re
 import json
 from yapsy.IPlugin import IPlugin
 import time
-
+import sys
 
 def extract_from_row(row):
     strip_strings = [
@@ -23,9 +23,7 @@ def extract_from_row(row):
     cells = row.find_all('td')
 
     if cells:
-        print(cells)
         data = [x.text for x in cells if x.text != '']
-        print(data)
         raw_date = data[0]
         payee = data[1]
         for strip in strip_strings:
@@ -44,7 +42,6 @@ def extract_from_row(row):
             'payee': ' '.join(payee.split()),
             'amount': '{} {}{}'.format(cur, neg, amt),
         }
-
     return json_data
 
 
@@ -55,7 +52,7 @@ def wait_for_element(driver, by, name):
 
         WebDriverWait(driver, 30).until(element_present)
     except TimeoutException:
-        print('Timed out waiting for page to load')
+        print('Timed out waiting for page to load', file=sys.stderr)
         return False
 
     return True
@@ -79,6 +76,18 @@ def login_suntrust(config):
     return driver
 
 
+def get_rows_from_soup(soup):
+    table = soup.find('table', class_='suntrust-transactions')
+    tbody = table.find('tbody')
+    return tbody.find_all('tr')
+
+
+def push_load_button(driver):
+    b_container = driver.find_element_by_class_name('suntrust-loader-container')
+    load_button = b_container.find_element_by_tag_name('button')
+    load_button.click()
+
+
 class SuntrustScraper(IPlugin):
     """Main plugin class forz the suntrust scraper."""
 
@@ -92,7 +101,7 @@ class SuntrustScraper(IPlugin):
             str:
                 Path to csv file containing scraped info.
         """
-        save_file = '/tmp/suntrust_scrape.csv'
+        save_file = '/tmp/suntrust_scrape.json'
         start = config['dtstart']
         end = config['dtend']
 
@@ -105,14 +114,15 @@ class SuntrustScraper(IPlugin):
         if infile:
             with open(infile, 'r') as html:
                 page_source = html.read()
+            print('HTML file loaded', file=sys.stderr)
         else:
             driver = login_suntrust(config)
+            print('Logged in to Suntrust', file=sys.stderr)
             page_source = driver.page_source
 
         soup = BeautifulSoup(page_source, 'html.parser')
-        table = soup.find('table', class_='suntrust-transactions ng-scope')
-        rows = table.find_all('tr')
-        print(len(rows))
+        rows = get_rows_from_soup(soup)
+
         json_output = []
 
         found_start = False
@@ -120,18 +130,20 @@ class SuntrustScraper(IPlugin):
             last_row = rows[-1]
             data = extract_from_row(last_row)
             if data['date'].replace('-', '') >= start:
-                b_container = driver.find_element_by_class_name('suntrust-loader-container')
-                load_button = b_container.find_element_by_tag_name('button')
-                load_button.click()
+                print('Loading...', data['date'], file=sys.stderr)
+                try:
+                    push_load_button(driver)
+                except:
+                    found_start = True
 
                 time.sleep(5)
-
-                rows = tbody.find_elements_by_tag_name('tr')
+                page_source = driver.page_source
+                soup = BeautifulSoup(page_source, 'html.parser')
+                rows = get_rows_from_soup(soup)
             else:
                 found_start = True
 
         for row in rows:
-            print(row)
             json_data = extract_from_row(row)
             dstring = json_data.get('date', '').replace('-', '')
             if dstring >= start and dstring <= end:
