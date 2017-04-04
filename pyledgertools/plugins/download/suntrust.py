@@ -40,7 +40,8 @@ def extract_from_row(row):
         json_data = {
             'date': '{}-{}-{}'.format(y, m, d),
             'payee': ' '.join(payee.split()),
-            'amount': '{} {}{}'.format(cur, neg, amt),
+            'amount': '{}{}'.format(neg, amt.replace(',', '')),
+            'currency': cur,
         }
     return json_data
 
