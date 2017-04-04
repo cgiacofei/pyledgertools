@@ -170,7 +170,9 @@ def interactive():
         getter = get_plugin(manager, conf['downloader'])
         parser = get_plugin(manager, conf['parser'])
 
-        file_path = conf.get('input_file', getter.download(conf))
+        file_path = conf.get('input_file', None)
+        if not file_path:
+            file_path = getter.download(conf)
 
         balances, transactions = parser.build_journal(file_path, conf)
 
@@ -199,6 +201,8 @@ def interactive():
 
                 if all(x in [False, None] for x in [skip, process, allocations]):
                     result = interactive_classifier.classify(text, method='bayes')
+                    cleaned = [x for x in result[1:] if round(x[1], 10) > 0]
+                    result = [result[0]] + cleaned
 
                 print('\n', UI.double_line)
                 print(transaction.to_string(), '\n')
@@ -210,6 +214,8 @@ def interactive():
                     print(Prompts.needs_manual_entry)
                     selected_account = input(': ')
                     print('')
+                elif isinstance(result, list) and len(result) == 1:
+                    selected_account = result[0][0]
                 elif isinstance(result, list):
                     for i, acc in enumerate(result[:5]):
                         print(Prompts.bayes_result.format(i, acc))
