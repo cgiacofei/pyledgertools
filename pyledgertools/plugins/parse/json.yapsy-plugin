@@ -1,0 +1,8 @@
+[Core]
+Name = json_parse
+Module = json
+
+[Documentation]
+Author = Chris Giacofei
+Version = 0.1
+Description = Parse json file into transaction object list.

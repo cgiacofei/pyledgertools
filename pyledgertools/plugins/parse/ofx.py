@@ -78,7 +78,8 @@ class ParseOFX(IPlugin):
 
                 a_tran = Posting(
                     account=config['from'],
-                    amount=amount
+                    amount=amount,
+                    currency=currency
                 )
 
                 t_tran = Transaction(
