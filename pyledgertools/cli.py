@@ -202,7 +202,7 @@ def interactive():
                 if all(x in [False, None] for x in [skip, process, allocations]):
                     result = interactive_classifier.classify(text, method='bayes')
                     cleaned = [x for x in result[1:] if round(x[1], 10) > 0]
-                    if cleaned:
+                    if len(cleaned) > 0:
                         result = cleaned
 
                 print('\n', UI.double_line)
