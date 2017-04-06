@@ -35,8 +35,8 @@ setup(
     zip_safe=False,
     entry_points = {
         'console_scripts': [
-            'ledger_tool=pyledgertools.cli:main',
-            'int-ofx=pyledgertools.cli:interactive'
+            'int-ofx=pyledgertools.cli:interactive',
+            'journal-sort=pyledgertools.scripts.journal:sort_journal'
         ]
     }
 )
