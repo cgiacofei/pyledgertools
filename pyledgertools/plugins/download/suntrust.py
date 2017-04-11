@@ -13,6 +13,7 @@ from yapsy.IPlugin import IPlugin
 import time
 import sys
 
+
 def extract_from_row(row):
     strip_strings = [
         'ELECTRONIC/ACH DEBIT',
@@ -32,7 +33,8 @@ def extract_from_row(row):
         p_regex = '([-]*)\s*(\$)(\d+.\d+)'
         d_regex = '.*(\d{2,2})/(\d{2,2})/(\d{4,4})'
         try:
-            neg, cur, amt = re.match(p_regex, data[2].strip(',')).groups()
+            amount = data[2].replace(',', '')
+            neg, cur, amt = re.match(p_regex, amount).groups()
             m, d, y = re.match(d_regex, raw_date).groups()
         except AttributeError:
             return json_data
@@ -70,7 +72,9 @@ def login_suntrust(config):
 
     driver.find_element_by_id('userId').send_keys(user)
     driver.find_element_by_xpath('//input[@type="password"]').send_keys(pswd)
-    driver.find_element_by_xpath('//input[@type="password"]').send_keys(Keys.RETURN)
+    driver.find_element_by_xpath('//input[@type="password"]').send_keys(
+        Keys.RETURN
+    )
 
     wait_for_element(driver, By.CLASS_NAME, 'suntrust-transactions-header')
     time.sleep(5)
@@ -84,7 +88,9 @@ def get_rows_from_soup(soup):
 
 
 def push_load_button(driver):
-    b_container = driver.find_element_by_class_name('suntrust-loader-container')
+    b_container = driver.find_element_by_class_name(
+        'suntrust-loader-container'
+    )
     load_button = b_container.find_element_by_tag_name('button')
     load_button.click()
 
@@ -149,7 +155,6 @@ class SuntrustScraper(IPlugin):
             dstring = json_data.get('date', '').replace('-', '')
             if dstring >= start and dstring <= end:
                 json_output.append(json_data)
-                print(json_data)
 
         with open(save_file, 'w') as outfile:
             json.dump(json_output, outfile)
