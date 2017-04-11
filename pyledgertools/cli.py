@@ -235,7 +235,7 @@ def interactive():
                                 Info.vim_helper.format(text, currency, amount),
                                 offset=4
                             )
-                            selected_account = selected_account.strip() 
+                            selected_account = selected_account.strip()
 
                 if selected_account:
                     interactive_classifier.update(text, selected_account)
@@ -244,7 +244,7 @@ def interactive():
                     print('\n', UI.single_line)
                     print(transaction.to_string())
                     with open(conf['ledger_file'], 'a') as outfile:
-                        print(transaction.to_string(), '\n', file=outfile)
+                        print(transaction.to_string() + '\n', file=outfile)
 
                     selected_account = None
 
