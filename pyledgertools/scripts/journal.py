@@ -22,4 +22,4 @@ def sort_journal():
     blocks.sort()
 
     for tran in blocks:
-        print(tran, '\n')
+        print(tran + '\n')
