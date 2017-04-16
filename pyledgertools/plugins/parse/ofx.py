@@ -26,6 +26,8 @@ class ParseOFX(IPlugin):
         tree.parse(ofx_file)
         ofx_obj = tree.convert()
 
+        stop_words = config.get('stop_words', [])
+
         balance_assertions = []
         transactions = []
 
@@ -57,9 +59,13 @@ class ParseOFX(IPlugin):
                 meta = []
 
                 payee = transaction.name
+                hash_payee = payee
+                for word in stop_words:
+                    payee = payee.replace(word, '')
+
                 amount = transaction.trnamt
                 trn_date = strftime(transaction.dtposted, '%Y-%m-%d')
-                if transaction.refnum: 
+                if transaction.refnum:
                     trn_id = transaction.refnum
                 else:
                     trn_id = transaction.fitid
@@ -70,7 +76,7 @@ class ParseOFX(IPlugin):
                     meta.append(('check', transaction.checknum))
 
                 # Build md5 Hash of transaction
-                check_hash = trn_id + trn_date + payee + str(amount)
+                check_hash = trn_id + trn_date + hash_payee + str(amount)
                 hash_obj = hashlib.md5(check_hash.encode())
                 uuid = hash_obj.hexdigest()
                 meta.append(('UUID', uuid))
