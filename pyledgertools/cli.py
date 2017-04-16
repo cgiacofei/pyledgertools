@@ -13,6 +13,7 @@ from yapsy.PluginManager import PluginManager
 import yaml
 
 from pyledgertools.strings import UI, Info, Prompts
+from pyledgertools.functions import amount_group
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -200,7 +201,10 @@ def interactive():
                 allocations = found_rule.get('allocations', None)
 
                 if all(x in [False, None] for x in [skip, process, allocations]):
-                    result = interactive_classifier.classify(text, method='bayes')
+                    result = interactive_classifier.classify(
+                        text + ' ' + amount_group(amount),
+                        method='bayes'
+                    )
                     cleaned = [x for x in result if round(x[1], 10) > 0]
                     if len(cleaned) > 0:
                         result = cleaned
@@ -238,7 +242,10 @@ def interactive():
                             selected_account = selected_account.strip()
 
                 if selected_account:
-                    interactive_classifier.update(text, selected_account)
+                    interactive_classifier.update(
+                        text + ' ' + amount_group(amount),
+                        selected_account
+                    )
                     transaction.add(selected_account, amount * -1, currency)
 
                     print('\n', UI.single_line)
