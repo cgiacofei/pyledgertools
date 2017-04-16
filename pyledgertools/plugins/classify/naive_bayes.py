@@ -6,39 +6,17 @@ from naiveBayesClassifier.trainer import Trainer
 from naiveBayesClassifier.classifier import Classifier as BayesClassifier
 from yapsy.IPlugin import IPlugin
 from itertools import groupby
-try:
-    from math import gcd
-except ImportError:
-    from fractions import gcd
 
 from operator import itemgetter
 import re
+
+from pyledgertools.functions import amount_group, GCD
 
 DOLLAR_REGEX = '([\$A-Z]+)?\s?([\-0-9]+.[0-9]{2,2})?'
 
 # Allocation RegEx
 ALLOC_REGEX = '\s+([A-Za-z0-9:_-]* ?[A-Za-z0-9:_-]*)\s*' + DOLLAR_REGEX
 TRANS_REGEX = '^\d{4,4}[/-]{1,1}\d{2,2}[/-]{1,1}\d{2,2}\s+[!\*]?\s?(?P<payee>[&#\w\s]+)'
-
-
-def GCD(dollars):
-    """Find greatest common divisor of list of dollar ammounts.
-
-    Works with integer and floats.
-
-    Parameters:
-        dollars (list): Values to find the common denominator.
-    """
-
-    # Convert dollar values to integers
-    dollars = [int(d * 100) for d in dollars]
-
-    res = dollars[0]
-
-    for c in dollars[1::]:
-        res = gcd(res, c)
-
-    return res / 100
 
 
 def train_journal(journal_string):
@@ -58,7 +36,7 @@ def train_journal(journal_string):
                 alloc_list = list(result[1])
                 alloc_list[2] = float(result[0][2])
                 alloc_list[0] = alloc_list[0].strip()
-
+                payee += ' ' + amount_group(alloc_list[2])
                 training_data.append([payee] + alloc_list)
 
     sorted_data = sorted(training_data, key=itemgetter(1))
@@ -68,7 +46,6 @@ def train_journal(journal_string):
     for elmnt, items in sorted_data:
         grp_tran = [v for v in items]
         return_data.append([elmnt, grp_tran, GCD([v[3] for v in grp_tran])])
-
     return return_data
 
 
