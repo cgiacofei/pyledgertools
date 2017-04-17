@@ -35,9 +35,13 @@ CapOne Options:
   # Used in pyledgertools script
   bankid: '031176110' # This seems redundant... but currently necessary.
   
-  #Login Credentials
+  # Login Credentials for ofx download
   ofxuser: your_username
   ofxpswd: your_password
+
+  # Login credentials for web login
+  webuser: your_username
+  webpswd: your_password
 
 checking:
   # Inherits config from this section:
