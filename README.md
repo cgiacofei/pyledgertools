@@ -5,6 +5,7 @@ Command line tools for downloading bank data and working with ledger-cli formatt
  - [ledger](http://www.ledger-cli.org) double entry accounting
  - [ofxtools](https://github.com/csingley/ofxtools)
  - [naiveBayesClassifier](https://github.com/muatik/naive-bayes-classifier)
+ - [PyYaml](https://github.com/yaml/pyyaml)
 
 ### Optional
  - [PhantomJS](http://phantomjs.org) for web scraping plugins
