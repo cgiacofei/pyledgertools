@@ -24,7 +24,7 @@ class OFXDownload(IPlugin):
             appver=config['appver']
         )
 
-        account = [BankAcct(config['bankid'], config['acctnum'], config['type'])]
+        account = [BankAcct(config['fid'], config['acctnum'], config['type'])]
         kwargs = make_date_kwargs(config)
 
         request = client.statement_request(
@@ -35,7 +35,7 @@ class OFXDownload(IPlugin):
         )
 
         response = client.download(request)
-        fname = '{}_{}.ofx'.format(config['bankid'], config['acctnum']) 
+        fname = '{}_{}.ofx'.format(config['fid'], config['acctnum']) 
         with open(fname, 'w') as ofxfile:
             print(response.text, file=ofxfile)
 
