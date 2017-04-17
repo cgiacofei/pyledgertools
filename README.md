@@ -1,4 +1,13 @@
 # pyledgertools
+Command line tools for downloading bank data and working with ledger-cli formatted files.
+
+## Requirements
+ - [ledger](http://www.ledger-cli.org) double entry accounting
+ - [ofxtools](https://github.com/csingley/ofxtools)
+ - [naiveBayesClassifier](https://github.com/muatik/naive-bayes-classifier)
+
+### Optional
+ - [PhantomJS](http://phantomjs.org) for web scraping plugins
 
 ## Example Config
 ```yaml
@@ -7,7 +16,7 @@ global:
   rules_file: /path/to/rule/file/or/directory/.rules.d
   paystubs: /path/to/paychecks
 
-CapOne Parent Options:
+CapOne Options:
   # Plugin to use for transaction download.
   downloader: OFX Download
 
@@ -31,7 +40,7 @@ CapOne Parent Options:
 
 checking:
   # Inherits config from this section:
-  parent: CapOne Parent Options
+  parent: CapOne Options
 
   # List of words to strip from payee field.
   stop_words: ['Debit Card Purchase - ']
@@ -52,7 +61,7 @@ checking:
   ledger_file: checking.ledger
 
 savings:
-  parent: CapOne Parent Options
+  parent: CapOne Options
   type: savings
   acctnum: '########'
   from: Assets:Banks:CapOne360:Savings
