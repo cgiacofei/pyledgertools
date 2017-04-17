@@ -40,6 +40,7 @@ setup(
         ]
     },
     scripts = [
-        'bin/accounts.sh'
+        'bin/accounts',
+        'bin/find_transactions'
     ]
 )
