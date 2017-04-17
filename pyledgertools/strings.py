@@ -8,7 +8,7 @@ class UI(object):
 
 class Info(object):
     skip_deposit_side = 'Skip transfer deposit'
-    vim_helper = '# {}\n# {} {}\n# Enter account name:\n\n'
+    vim_helper = '# {}\n# {} {}\n# Enter account name:\n'
 
 
 class Prompts(object):

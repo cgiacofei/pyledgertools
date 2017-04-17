@@ -36,7 +36,10 @@ setup(
     entry_points = {
         'console_scripts': [
             'int-ofx=pyledgertools.cli:interactive',
-            'journal-sort=pyledgertools.scripts.journal:sort_journal'
+            'journal-sort=pyledgertools.scripts.journal:sort_journal',
         ]
-    }
+    },
+    scripts = [
+        'bin/accounts.sh'
+    ]
 )

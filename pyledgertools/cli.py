@@ -112,6 +112,12 @@ def vim_input(text='', offset=None):
     """Use editor for input."""
     editor = os.environ.get('EDITOR', 'vim')
 
+    proc = Popen(['accounts.sh'], stdout=PIPE)
+    ledger_accounts = proc.stdout.read()
+
+    text += '    \n;;* Account Completion *;;\n2017-01-01 Completion Accounts\n'
+    text += ledger_accounts.decode('utf-8')
+
     with tempfile.NamedTemporaryFile(suffix='.ledger') as tf:
         tf.write(text.encode())
         tf.flush()
