@@ -83,9 +83,9 @@ def read_ledger(journal=None):
     """Read a ledger journal and return formatted transactions."""
 
     if journal is None:
-        cmd = ['ledger', 'print']
+        cmd = ['ledger', 'print', '--limit', 'payee!~/Opening Balance/']
     else:
-        cmd = ['ledger', '-f', journal, 'print']
+        cmd = ['ledger', '-f', journal, 'print', '--limit', 'payee!~/Opening Balance/']
 
     process = Popen(cmd, stdout=PIPE)
     journal, err = process.communicate()
