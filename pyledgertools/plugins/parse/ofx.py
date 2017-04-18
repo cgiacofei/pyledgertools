@@ -80,7 +80,7 @@ class ParseOFX(IPlugin):
                 hash_obj = hashlib.md5(check_hash.encode())
                 uuid = hash_obj.hexdigest()
                 meta.append(('UUID', uuid))
-                meta.append(('ImportDate', strftime(now(), '%Y-%m-%d')))
+                meta.append(('Imported', strftime(now(), '%Y-%m-%d')))
 
                 a_tran = Posting(
                     account=config['from'],
