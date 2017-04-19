@@ -15,7 +15,8 @@ from pyledgertools.functions import amount_group, GCD
 DOLLAR_REGEX = '([\$A-Z]+)?\s?([\-0-9]+.[0-9]{2,2})?'
 
 # Allocation RegEx
-ALLOC_REGEX = '\s+([A-Za-z0-9:_-]* ?[A-Za-z0-9:_-]*)\s*' + DOLLAR_REGEX
+ALLOC_REGEX = '\s+([A-Za-z0-9:_\- ]*[A-Za-z0-9:_\-]+)\s*' + DOLLAR_REGEX
+# ALLOC_REGEX = '\s+((?!.*  )[a-zA-Z0-9:_\- ]*)' + DOLLAR_REGEX
 TRANS_REGEX = '^\d{4,4}[/-]{1,1}\d{2,2}[/-]{1,1}\d{2,2}\s+[!\*]?\s?(?P<payee>[&#\w\s]+)'
 
 

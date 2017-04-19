@@ -41,6 +41,7 @@ setup(
     },
     scripts = [
         'bin/accounts',
-        'bin/find_transactions'
+        'bin/find_transactions',
+        'bin/find_files',
     ]
 )
