@@ -76,27 +76,27 @@ savings:
 
 ### Config Options
 *Plugins*
- - *downloader*: Plugin to use for downloading transaction data.
- - *parser*: Plugin to use for parsing downloaded data.
+ - **downloader**: Plugin to use for downloading transaction data.
+ - **parser**: Plugin to use for parsing downloaded data.
 
 *Download Options*
- - *ledger_file*: Ledger file to check transactions against.
- - *dtend*: Data range end date for downloading data.
- - *dtstart*: Data range start date for downloading data.
- - *from*: Ledger account to apply transactions to.
- - to: Default ledger account if transactions not matched (not currently used).
- - *webuser*: Bank webpage login username
- - *webpswd*: Bank webpage login password
+ - **ledger_file**: Ledger file to check transactions against.
+ - **dtend**: Data range end date for downloading data.
+ - **dtstart**: Data range start date for downloading data.
+ - **from**: Ledger account to apply transactions to.
+ - **to**: Default ledger account if transactions not matched (not currently used).
+ - **webuser**: Bank webpage login username
+ - **webpswd**: Bank webpage login password
 
 *OFX Options*
- - *ofxuser*: Bank user for OFX download.
- - *ofxpswd*: Bank password for OFX download.
- - *acctnum*: Bank account number
- - *appid*: OFX app id.
- - *appver*: OFX app version.
- - *fid*: OFX fid
- - *org*: OFX organization string.
- - *type*: Account type (checking, savings, investment).
- - *url*: URL for OFX download.
- - *version*: OFX version.
+ - **ofxuser**: Bank user for OFX download.
+ - **ofxpswd**: Bank password for OFX download.
+ - **acctnum**: Bank account number
+ - **appid**: OFX app id.
+ - **appver**: OFX app version.
+ - **fid**: OFX fid
+ - **org**: OFX organization string.
+ - **type**: Account type (checking, savings, investment).
+ - **url**: URL for OFX download.
+ - **version**: OFX version.
 
