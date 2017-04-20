@@ -178,8 +178,11 @@ def interactive():
         parser = get_plugin(manager, conf['parser'])
 
         file_path = conf.get('input_file', None)
-        if not file_path:
-            file_path = getter.download(conf)
+        try:
+            if not file_path:
+                file_path = getter.download(conf)
+        except:
+            continue
 
         balances, transactions = parser.build_journal(file_path, conf)
 
