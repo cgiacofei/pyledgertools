@@ -33,8 +33,11 @@ class ParseOFX(IPlugin):
 
         # There may be multiple bank statements in one file
         for statement in ofx_obj.statements:
+            try:
+                routing = statement.account.bankid
+            except:
+                routing = 'na'
 
-            routing = statement.account.bankid
             account = statement.account.acctid
             currency = CURRENCY_LOOKUP[statement.currency]
             balance = statement.ledgerbal.balamt
