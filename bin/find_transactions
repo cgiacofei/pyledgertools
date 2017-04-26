@@ -11,7 +11,7 @@ echo ';; Located Transactions' > $tmpdir/tmp.ledger
 echo >> $tmpdir/tmp.ledger
 
 for file in $DIR/*.ledger; do
-    awk 'BEGIN { RS="" ; ORS="\n\n" } ; /'${INPUT}'/ { print ";; " FILENAME " ;;\n" $0 }' $file >> $tmpdir/tmp.ledger
+    awk 'BEGIN { RS="" ; ORS="\n\n" } ; tolower($0) ~ /'${INPUT}'/ { print ";; " FILENAME " ;;\n" $0 }' $file >> $tmpdir/tmp.ledger
 done
 original=($(awk 'BEGIN { RS="" ; ORS="\n\n" } ; { print }' $tmpdir/tmp.ledger))
 
