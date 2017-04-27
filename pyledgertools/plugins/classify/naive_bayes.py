@@ -34,11 +34,16 @@ def train_journal(journal_string):
 
             result = re.findall(ALLOC_REGEX, ' '.join(tran[1:]))
             if len(result) > 1:
-                alloc_list = list(result[1])
-                alloc_list[2] = float(result[0][2])
-                alloc_list[0] = alloc_list[0].strip()
-                payee += ' ' + amount_group(alloc_list[2])
-                training_data.append([payee] + alloc_list)
+                try:
+                    alloc_list = list(result[1])
+                    alloc_list[2] = float(result[0][2])
+                    alloc_list[0] = alloc_list[0].strip()
+                    payee += ' ' + amount_group(alloc_list[2])
+                    training_data.append([payee] + alloc_list)
+                # Skip tranactions where amount can't be converted to float.
+                # Occurs in transactions containing commodity conversion.
+                except ValueError:
+                    pass
 
     sorted_data = sorted(training_data, key=itemgetter(1))
     sorted_data = groupby(sorted_data, itemgetter(1))
