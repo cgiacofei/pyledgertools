@@ -132,6 +132,120 @@ def vim_input(text='', offset=None):
                 return line.strip().decode('utf-8')
 
 
+def automatic():
+    """Run the command line interface without user input."""
+
+    default_config = os.path.join(
+        expanduser("~"), '.config', 'ledgertools', 'ledgertools.yaml'
+    )
+
+    # Load Plugins
+    manager = PluginManager()
+    manager.setPluginPlaces([os.path.join(DIR_PATH, 'plugins')])
+    manager.collectPlugins()
+
+    # Load classification plugins
+    rule = get_plugin(manager, 'Rule Based Classifier')
+    bayes = get_plugin(manager, 'Naive Bayes Classifier')
+
+    # Load command line options.
+    cli_options = get_args()
+
+    c_path = cli_options.get('config', default_config)
+
+    with open(c_path, 'r') as f:
+        config = yaml.load(f)
+
+    # -------------------------------------------------------------------------
+    # Start processing
+    # -------------------------------------------------------------------------
+    global_conf = config.get('global', {})
+
+    accounts = cli_options['account'].split(',')
+
+    for account in accounts:
+        base_conf = global_conf
+        conf = config.get(account, None)
+        parent_conf = config.get(conf.get('parent', 'NaN'), {})
+
+        base_conf.update(parent_conf)
+        base_conf.update(conf)
+        base_conf.update(cli_options)
+        conf = base_conf
+
+        # Get downloader and parser plugins fromthe config.
+        getter = get_plugin(manager, conf['downloader'])
+        parser = get_plugin(manager, conf['parser'])
+
+        file_path = conf.get('input_file', None)
+        try:
+            if not file_path:
+                file_path = getter.download(conf)
+        except:
+            continue
+
+        balances, transactions = parser.build_journal(file_path, conf)
+
+        transactions.sort(key=lambda x: x.date)
+
+        learning_file = conf.get('journal_file', read_ledger())
+        interactive_classifier = bayes.setup(journal_file=learning_file)
+        rules = rule.build_rules(conf.get('rules_file', None))
+        uuids = list_uuids()
+
+        for transaction in transactions:
+            if transaction.uuid not in uuids:
+                result = None
+                selected_account = None
+
+                text = transaction.payee
+                amount = transaction.postings[0].amount
+                currency = transaction.postings[0].currency
+
+                found_rule = rule.find_matching_rule(rules, transaction)
+
+                # Check for keys in rule
+                skip = found_rule.get('ignore', False)
+                process = found_rule.get('process', None)
+                allocations = found_rule.get('allocations', None)
+
+                if all(x in [False, None] for x in [skip, process, allocations]):
+                    result = interactive_classifier.classify(
+                        text + ' ' + amount_group(amount),
+                        method='bayes'
+                    )
+                    cleaned = [x for x in result if round(x[1], 10) > 0]
+                    if len(cleaned) > 0:
+                        result = cleaned
+
+                print('\n', UI.double_line)
+                print(transaction.to_string(), '\n')
+
+                if skip is True:
+                    print(Info.skip_deposit_side)
+                    pass
+                elif result is None:
+                    selected_account = conf.get('to', 'Expenses:Unkown')
+                    print('')
+                elif isinstance(result, list):
+                    selected_account = result[0][0]
+
+                if selected_account:
+                    interactive_classifier.update(
+                        text + ' ' + amount_group(amount),
+                        selected_account
+                    )
+                    transaction.add(selected_account, amount * -1, currency)
+
+                    print('\n', UI.single_line)
+                    print(transaction.to_string())
+                    with open(conf['ledger_file'], 'a') as outfile:
+                        print(transaction.to_string() + '\n', file=outfile)
+
+                    selected_account = None
+
+                print('\n', UI.double_line)
+
 def interactive():
     """Run the command line interface."""
 

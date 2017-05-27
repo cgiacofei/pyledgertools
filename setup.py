@@ -36,6 +36,7 @@ setup(
     entry_points = {
         'console_scripts': [
             'int-ofx=pyledgertools.cli:interactive',
+            'auto-import=pyledgertools.cli:automatic',
             'journal-sort=pyledgertools.scripts.journal:sort_journal',
         ]
     },
