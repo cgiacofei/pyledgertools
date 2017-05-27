@@ -1,20 +1,24 @@
 appdirs==1.4.3
+beautifulsoup4==4.5.3
+bs4==0.0.1
 decorator==4.0.11
 ipython==5.3.0
 ipython-genutils==0.2.0
 -e git+https://github.com/muatik/naive-bayes-classifier@bb81fb0bf14304965f708c355064ec82f2e25c3c#egg=naiveBayesClassifier
 nose==1.3.7
-ofxtools==0.3.13
 packaging==16.8
 pexpect==4.2.1
 pickleshare==0.7.4
 prompt-toolkit==1.0.13
 ptyprocess==0.5.1
 Pygments==2.2.0
+-e git+git@github.com:cgiacofei/pyledgertools.git@5888995cc5edeafdae4e79a56e319be6a2a8375f#egg=pyledgertools
 pyparsing==2.2.0
 PyYAML==3.12
+selenium==3.4.1
 simplegeneric==0.8.1
 six==1.10.0
 traitlets==4.3.2
 wcwidth==0.1.7
 Yapsy==1.11.223
+-e git+https://github.com/csingley/ofxtools.git@6f8e1321ec5e452da06c583d254181e4eeb5099b#egg=ofxtools
