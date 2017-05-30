@@ -166,6 +166,8 @@ def automatic():
     learning_global = read_ledger()
 
     for account in accounts:
+        print(account, file=sys.stdout)
+
         base_conf = global_conf
         conf = config.get(account, None)
         parent_conf = config.get(conf.get('parent', 'NaN'), {})
@@ -223,15 +225,15 @@ def automatic():
                     if len(cleaned) > 0:
                         result = cleaned
 
-                print('\n', UI.double_line)
-                print(transaction.to_string(), '\n')
+                print('\n', UI.double_line, file=sys.stderr)
+                print(transaction.to_string(), '\n', file=sys.stderr)
 
                 if skip is True:
-                    print(Info.skip_deposit_side)
+                    print(Info.skip_deposit_side, file=sys.stderr)
                     pass
                 elif result is None:
                     selected_account = conf.get('to', 'Expenses:Unkown')
-                    print('')
+                    print('', file=sys.stderr)
                 elif isinstance(result, list):
                     selected_account = result[0][0]
 
@@ -242,14 +244,14 @@ def automatic():
                     )
                     transaction.add(selected_account, amount * -1, currency)
 
-                    print('\n', UI.single_line)
-                    print(transaction.to_string())
+                    print('\n', UI.single_line, file=sys.stderr)
+                    print(transaction.to_string(), file=sys.stdout)
                     with open(conf['ledger_file'], 'a') as outfile:
                         print(transaction.to_string() + '\n', file=outfile)
 
                     selected_account = None
 
-                print('\n', UI.double_line)
+                print('\n', UI.double_line, file=sys.stderr)
 
 def interactive():
     """Run the command line interface."""
