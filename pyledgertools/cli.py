@@ -163,6 +163,8 @@ def automatic():
 
     accounts = cli_options['account'].split(',')
 
+    learning_global = read_ledger()
+
     for account in accounts:
         base_conf = global_conf
         conf = config.get(account, None)
@@ -188,7 +190,10 @@ def automatic():
 
         transactions.sort(key=lambda x: x.date)
 
-        learning_file = conf.get('journal_file', read_ledger())
+        learning_file = conf.get('journal_file', None)
+        if not learning_file:
+            learning_file = learning_global
+
         interactive_classifier = bayes.setup(journal_file=learning_file)
         rules = rule.build_rules(conf.get('rules_file', None))
         uuids = list_uuids()
