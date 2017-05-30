@@ -80,7 +80,7 @@ def get_plugin(manager, name):
 
 
 def read_ledger(journal=None):
-    """Read a ledger journal and return formatted transactions."""
+    """Read a ledger journal and return fuuidsormatted transactions."""
 
     if journal is None:
         cmd = ['ledger', 'print', '--limit', 'payee!~/Opening Balance/']
@@ -93,19 +93,12 @@ def read_ledger(journal=None):
     return journal
 
 
-def list_uuids(journal=None):
+def list_uuids(journal):
     """Pull list of UUID's from ledger journal."""
-
-    if journal is None:
-        cmd = ['ledger', '--format', '"%N\n"', 'reg']
-    else:
-        cmd = ['ledger', '-f', journal, '--format', '"%N\n"', 'reg']
 
     # Make list of existing UUID's
     regex = 'UUID:\s+([a-z0-9]+)'
-    process = Popen(cmd, stdout=PIPE)
-    ledger_data, err = process.communicate()
-    return re.findall(regex, str(ledger_data))
+    return re.findall(regex, str(journal))
 
 
 def vim_input(text='', offset=None):
@@ -164,6 +157,7 @@ def automatic():
     accounts = cli_options['account'].split(',')
 
     learning_global = read_ledger()
+    uuids = list_uuids(learning_global)
 
     for account in accounts:
         print(account, file=sys.stdout)
@@ -192,16 +186,18 @@ def automatic():
 
         transactions.sort(key=lambda x: x.date)
 
-        learning_file = conf.get('journal_file', None)
-        if not learning_file:
+        journal_file = conf.get('journal_file', None)
+        if not journal_file:
             learning_file = learning_global
+        else:
+            learning_file = read_ledger(journal_file)
 
         interactive_classifier = bayes.setup(journal_file=learning_file)
         rules = rule.build_rules(conf.get('rules_file', None))
-        uuids = list_uuids()
 
         for transaction in transactions:
             if transaction.uuid not in uuids:
+                uuids.append(transaction.uuid)
                 result = None
                 selected_account = None
 
