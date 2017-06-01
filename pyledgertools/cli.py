@@ -160,7 +160,7 @@ def automatic():
     uuids = list_uuids(learning_global)
 
     for account in accounts:
-        print(account, file=sys.stdout)
+        print('## Transactions for ' + account + '\n', file=sys.stdout)
 
         base_conf = global_conf
         conf = config.get(account, None)
@@ -238,7 +238,7 @@ def automatic():
                     )
                     transaction.add(selected_account, amount * -1, currency)
 
-                    print(transaction.to_string(), file=sys.stdout)
+                    print(transaction.to_string() + '\n', file=sys.stdout)
                     with open(conf['ledger_file'], 'a') as outfile:
                         print(transaction.to_string() + '\n', file=outfile)
 
