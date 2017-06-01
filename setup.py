@@ -31,6 +31,8 @@ setup(
         'PyYaml',
         'naiveBayesClassifier',
     ],
+    dependency_links =
+    ['https://github.com/csingley/ofxtools.git@6f8e1321ec5e452da06c583d254181e4eeb5099b#egg=ofxtools'],
     include_package_data=True,
     zip_safe=False,
     entry_points = {
