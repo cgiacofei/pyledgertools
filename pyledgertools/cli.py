@@ -238,7 +238,9 @@ def automatic():
                     )
                     transaction.add(selected_account, amount * -1, currency)
 
+                    print("```", file=sys.stdout)
                     print(transaction.to_string(), file=sys.stdout)
+                    print("```", file=sys.stdout)
                     with open(conf['ledger_file'], 'a') as outfile:
                         print(transaction.to_string() + '\n', file=outfile)
 
