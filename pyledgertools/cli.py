@@ -160,8 +160,6 @@ def automatic():
     uuids = list_uuids(learning_global)
 
     for account in accounts:
-        print('## Transactions for ' + account + '\n', file=sys.stdout)
-
         base_conf = global_conf
         conf = config.get(account, None)
         parent_conf = config.get(conf.get('parent', 'NaN'), {})
@@ -195,6 +193,8 @@ def automatic():
         interactive_classifier = bayes.setup(journal_file=learning_file)
         rules = rule.build_rules(conf.get('rules_file', None))
 
+        print_count = 0
+        transactions = ''
         for transaction in transactions:
             if transaction.uuid not in uuids:
                 uuids.append(transaction.uuid)
@@ -232,20 +232,20 @@ def automatic():
                     selected_account = result[0][0]
 
                 if selected_account:
+                    print_count += 1
                     interactive_classifier.update(
                         text + ' ' + amount_group(amount),
                         selected_account
                     )
                     transaction.add(selected_account, amount * -1, currency)
 
-                    print("```", file=sys.stdout)
-                    print(transaction.to_string(), file=sys.stdout)
-                    print("```" + '\n', file=sys.stdout)
+                    transactions += "```\n" + transaction.to_string() + "\n```\n"
                     with open(conf['ledger_file'], 'a') as outfile:
                         print(transaction.to_string() + '\n', file=outfile)
 
                     selected_account = None
-
+        if print_count > 0:
+            print('## Transactions for ' + account + '\n' + transactions, file=sys.stdout)
 
 def interactive():
     """Run the command line interface."""
