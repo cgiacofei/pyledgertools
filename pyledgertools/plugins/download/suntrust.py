@@ -90,7 +90,9 @@ def login_suntrust(config):
 
 def get_rows_from_soup(soup):
     table = soup.find('table', class_='suntrust-transactions')
+    print('Found transaction table.', file=sys.stderr)
     tbody = table.find('tbody')
+    print('Extracted table body.', file=sys.stderr)
     return tbody.find_all('tr')
 
 
@@ -155,6 +157,11 @@ class SuntrustScraper(IPlugin):
                 rows = get_rows_from_soup(soup)
             else:
                 found_start = True
+
+        print(
+            'Found ' + len(rows) + ' possible transactions.',
+            file=sys.stderr
+        )
 
         for row in rows:
             json_data = extract_from_row(row)
