@@ -167,6 +167,9 @@ class SuntrustScraper(IPlugin):
         for row in rows:
             json_data = extract_from_row(row)
             dstring = json_data.get('date', '').replace('-', '')
+            print(json_data, file=sys.stderr)
+            print(start, dstring, end)
+
             if dstring >= start and dstring <= end:
                 json_output.append(json_data)
 
