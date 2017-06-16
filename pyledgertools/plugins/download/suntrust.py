@@ -158,19 +158,12 @@ class SuntrustScraper(IPlugin):
             else:
                 print('Date range loaded.', file=sys.stderr)
                 found_start = True
-
-        print(
-            'Found', len(rows), 'possible transactions.',
-            file=sys.stderr
-        )
-
         for row in rows:
             json_data = extract_from_row(row)
             dstring = json_data.get('date', '').replace('-', '')
 
             if dstring >= start and dstring <= end:
                 json_output.append(json_data)
-
         with open(save_file, 'w') as outfile:
             json.dump(json_output, outfile)
 
