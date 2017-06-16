@@ -194,7 +194,7 @@ def automatic():
         rules = rule.build_rules(conf.get('rules_file', None))
 
         print_count = 0
-        transactions = ''
+        str_out = ''
         for transaction in transactions:
             if transaction.uuid not in uuids:
                 uuids.append(transaction.uuid)
@@ -239,13 +239,13 @@ def automatic():
                     )
                     transaction.add(selected_account, amount * -1, currency)
 
-                    transactions += "```\n" + transaction.to_string() + "\n```\n"
+                    str_out += "```\n" + transaction.to_string() + "\n```\n"
                     with open(conf['ledger_file'], 'a') as outfile:
                         print(transaction.to_string() + '\n', file=outfile)
 
                     selected_account = None
         if print_count > 0:
-            print('## Transactions for ' + account + '\n' + transactions, file=sys.stdout)
+            print('## Transactions for ' + account + '\n' + str_out, file=sys.stdout)
 
 def interactive():
     """Run the command line interface."""
