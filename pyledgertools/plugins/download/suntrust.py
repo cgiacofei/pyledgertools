@@ -144,6 +144,7 @@ class SuntrustScraper(IPlugin):
         while not found_start and not infile:
             last_row = rows[-1]
             data = extract_from_row(last_row)
+            print(data, file=sys.stderr)
             if data['date'].replace('-', '') >= start:
                 print('Loading...', data['date'], file=sys.stderr)
                 try:
