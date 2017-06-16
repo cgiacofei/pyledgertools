@@ -67,8 +67,11 @@ def login_suntrust(config):
     pswd = config['webpswd']
 
     driver = webdriver.PhantomJS()
-
+    #driver = webdriver.Firefox()
+    print('Webdriver loaded.', file=sys.stderr)
     driver.get(login_url)
+
+    time.sleep(5)
 
     driver.find_element_by_id('userId').send_keys(user)
     driver.find_element_by_xpath('//input[@type="password"]').send_keys(pswd)
@@ -76,7 +79,11 @@ def login_suntrust(config):
         Keys.RETURN
     )
 
-    wait_for_element(driver, By.CLASS_NAME, 'suntrust-transactions-header')
+    loaded = wait_for_element(driver, By.CLASS_NAME, 'suntrust-transactions-header')
+    if loaded:
+        print('Page load successful', file=sys.stderr)
+    else:
+        print('Page not loaded', file=sys.stderr)
     time.sleep(5)
     return driver
 
@@ -129,7 +136,6 @@ class SuntrustScraper(IPlugin):
 
         soup = BeautifulSoup(page_source, 'html.parser')
         rows = get_rows_from_soup(soup)
-
         json_output = []
 
         found_start = False
