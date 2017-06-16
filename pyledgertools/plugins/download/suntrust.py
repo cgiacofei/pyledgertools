@@ -144,7 +144,6 @@ class SuntrustScraper(IPlugin):
         while not found_start and not infile:
             last_row = rows[-1]
             data = extract_from_row(last_row)
-            print(data, file=sys.stderr)
             if data['date'].replace('-', '') >= start:
                 print('Loading...', data['date'], file=sys.stderr)
                 try:
@@ -157,18 +156,17 @@ class SuntrustScraper(IPlugin):
                 soup = BeautifulSoup(page_source, 'html.parser')
                 rows = get_rows_from_soup(soup)
             else:
+                print('Date range loaded.', file=sys.stderr)
                 found_start = True
 
         print(
-            'Found ' + len(rows) + ' possible transactions.',
+            'Found', len(rows), 'possible transactions.',
             file=sys.stderr
         )
 
         for row in rows:
             json_data = extract_from_row(row)
             dstring = json_data.get('date', '').replace('-', '')
-            print(json_data, file=sys.stderr)
-            print(start, dstring, end)
 
             if dstring >= start and dstring <= end:
                 json_output.append(json_data)
