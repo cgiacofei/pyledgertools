@@ -1,5 +1,6 @@
 """OFX downloader."""
 
+from collections import defaultdict
 from ofxtools.Client import OFXClient, StmtRq, InvStmtRq
 from ofxtools.Types import DateTime
 from yapsy.IPlugin import IPlugin
@@ -25,26 +26,43 @@ class OFXDownload(IPlugin):
             appid=config.get('appid', None),
             appver=config.get('appver', None)
         )
+        stmtrqs = defaultdict(list)
+        try:
+            acct = config.get('checking', config['savings'])
+            stmtrqs['stmtrqs'].append(
+                StmtRq(
+                    acctid=acct,
+                    dtstart=config['dtstart'],
+                    dtend=config['dtend']
+                )
+            )
+            fname = '{}_{}.ofx'.format(
+                config['fid'],
+                config.get('checking', config['savings'])
+            )
+        except:
+            pass
 
         try:
-            stmtrq = StmtRq(acctid=config.get('checking', config['savings']))
+            stmtrqs['invstmtrqs'].append(
+                InvStmtRq(
+                    acctid=config['investment'],
+                    dtstart=config['dtstart'],
+                    dtend=config['dtend']
+                )
+            )
+            fname = '{}_{}.ofx'.format(
+                config['fid'],
+                config['investment']
+            )
         except:
-            stmtrq = None
+            pass
 
-        try:
-            invstmtrq = InvStmtRq(acctid=config['investment'])
-        except:
-            invstmtrq = None
+        user = config['ofxuser']
+        pswd = config['ofxpswd']
+        response = client.request_statements(user=user, password=pswd, **stmtrqs)
 
-        response = client.request_statements(
-            user=config['ofxuser'],
-            password=config['ofxpswd'],
-            stmtrqs=[stmtrq],
-            invstmtrqs=[invstmtrq]
-        )
-
-        fname = '{}_{}.ofx'.format(config['fid'], config['acctnum']) 
         with open(fname, 'w') as ofxfile:
-            print(response.text, file=ofxfile)
+            print(response.read(), file=ofxfile)
 
         return fname

@@ -27,7 +27,7 @@ setup(
     packages=['pyledgertools'],
     install_requires=[
         'nose',
-        'ofxtools==0.3.14',
+        'ofxtools==0.5',
         'PyYaml',
         'naiveBayesClassifier',
     ],
