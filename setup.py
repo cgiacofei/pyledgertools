@@ -30,6 +30,7 @@ setup(
         'ofxtools==0.3.14',
         'PyYaml',
         'naiveBayesClassifier',
+        'yapsy',
     ],
     include_package_data=True,
     zip_safe=False,
