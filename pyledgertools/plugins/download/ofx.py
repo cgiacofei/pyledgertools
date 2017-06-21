@@ -1,6 +1,6 @@
 """OFX downloader."""
 
-from ofxtools.Client import OFXClient, BankAcct
+from ofxtools.Client import OFXClient, StmtRq, InvStmtRq
 from ofxtools.Types import DateTime
 from yapsy.IPlugin import IPlugin
 
@@ -16,25 +16,33 @@ class OFXDownload(IPlugin):
         """Setup account info and credentials."""
 
         client = OFXClient(
-            config['url'],
-            config['org'],
-            config['fid'],
-            version=config['version'],
-            appid=config['appid'],
-            appver=config['appver']
+            config.get('url', None),
+            org=config.get('org', None),
+            fid=config.get('fid', None),
+            bankid=config.get('bankid', None),
+            brokerid=config.get('brokerid', None),
+            version=config.get('version', None),
+            appid=config.get('appid', None),
+            appver=config.get('appver', None)
         )
 
-        account = [BankAcct(config['fid'], config['acctnum'], config['type'])]
-        kwargs = make_date_kwargs(config)
+        try:
+            stmtrq = StmtRq(acctid=config.get('checking', config['savings']))
+        except:
+            stmtrq = None
 
-        request = client.statement_request(
-            config['ofxuser'],
-            config['ofxpswd'],
-            account,
-            **kwargs
+        try:
+            invstmtrq = InvStmtRq(acctid=config['investment'])
+        except:
+            invstmtrq = None
+
+        response = client.request_statements(
+            user=config['ofxuser'],
+            password=config['ofxpswd'],
+            stmtrqs=[stmtrq],
+            invstmtrqs=[invstmtrq]
         )
 
-        response = client.download(request)
         fname = '{}_{}.ofx'.format(config['fid'], config['acctnum']) 
         with open(fname, 'w') as ofxfile:
             print(response.text, file=ofxfile)
