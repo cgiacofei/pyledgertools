@@ -3,6 +3,7 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -63,36 +64,6 @@ def wait_for_element(driver, by, name):
     return True
 
 
-def login_suntrust(config):
-    login_url = 'https://onlinebanking.suntrust.com'
-    user = config['webuser']
-    pswd = config['webpswd']
-    print('Loading webdriver...', file=sys.stderr)
-
-    if config.get('browser', None) == 'PhantomJS':
-        driver = webdriver.PhantomJS()
-    else:
-        driver = webdriver.Firefox(firefox_profile=webdriver.FirefoxProfile())
-    print('Done.', file=sys.stderr)
-    driver.get(login_url)
-
-    time.sleep(5)
-
-    driver.find_element_by_id('userId').send_keys(user)
-    driver.find_element_by_xpath('//input[@type="password"]').send_keys(pswd)
-    driver.find_element_by_xpath('//input[@type="password"]').send_keys(
-        Keys.RETURN
-    )
-
-    loaded = wait_for_element(driver, By.CLASS_NAME, 'suntrust-transactions-header')
-    if loaded:
-        print('Page load successful', file=sys.stderr)
-    else:
-        print('Page not loaded', file=sys.stderr)
-    time.sleep(5)
-    return driver
-
-
 def get_rows_from_soup(soup):
     table = soup.find('table', class_='suntrust-transactions')
     print('Found transaction table.', file=sys.stderr)
@@ -112,6 +83,41 @@ def push_load_button(driver):
 class SuntrustScraper(IPlugin):
     """Main plugin class forz the suntrust scraper."""
 
+    def login_suntrust(self):
+        config = self.config
+        login_url = 'https://onlinebanking.suntrust.com'
+        user = config['webuser']
+        pswd = config['webpswd']
+        self.logger.debug('Loading webdriver.')
+
+        if config.get('browser', None) == 'PhantomJS':
+            driver = webdriver.PhantomJS()
+        else:
+            driver = webdriver.Firefox()
+        self.logger.debug('Done.')
+        driver.get(login_url)
+
+        time.sleep(5)
+
+        try:
+            driver.find_element_by_id('userId').send_keys(user)
+        except NoSuchElementException:
+            self.logger.error('No login fields found.', exc_info=True)
+
+        driver.find_element_by_xpath('//input[@type="password"]').send_keys(pswd)
+        driver.find_element_by_xpath('//input[@type="password"]').send_keys(
+            Keys.RETURN
+        )
+
+        loaded = wait_for_element(driver, By.CLASS_NAME, 'suntrust-transactions-header')
+        if loaded:
+            self.logger.info('Page load successful')
+        else:
+            self.logger.error('Page not loaded')
+        time.sleep(5)
+        return driver
+
+
     def download(self, config):
         """Download method
 
@@ -122,8 +128,9 @@ class SuntrustScraper(IPlugin):
             str:
                 Path to csv file containing scraped info.
         """
+        self.config = config
+
         logging.config.dictConfig(config.get('logging', None))
-        print(config.get('logging'), file=sys.stderr)
         self.logger = logging.getLogger(__name__)
 
         save_file = '/tmp/suntrust_scrape.json'
@@ -141,7 +148,7 @@ class SuntrustScraper(IPlugin):
                 page_source = html.read()
             print('HTML file loaded', file=sys.stderr)
         else:
-            driver = login_suntrust(config)
+            driver = self.login_suntrust()
             print('Logged in to Suntrust', file=sys.stderr)
             page_source = driver.page_source
 
