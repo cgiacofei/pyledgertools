@@ -247,14 +247,14 @@ def automatic():
                 posting.update({'amount': amount * -1, 'currency': currency})
                 transaction.add(**posting)
 
-            print_out = True
+            print_results = True
 
             print(transaction.to_string(), '\n', file=sys.stderr)
             str_out += "```\n" + transaction.to_string() + "\n```\n"
             with open(conf['ledger_file'], 'a') as outfile:
                 print(transaction.to_string() + '\n', file=outfile)
 
-        if print_out:
+        if print_results:
             print('## Transactions for ' + account + '\n' + str_out, file=sys.stdout)
 
 

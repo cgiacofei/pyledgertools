@@ -65,10 +65,13 @@ def login_suntrust(config):
     login_url = 'https://onlinebanking.suntrust.com'
     user = config['webuser']
     pswd = config['webpswd']
+    print('Loading webdriver...', file=sys.stderr)
 
-    driver = webdriver.PhantomJS()
-    #driver = webdriver.Firefox()
-    print('Webdriver loaded.', file=sys.stderr)
+    if config.get('browser', None) == 'PhantomJS':
+        driver = webdriver.PhantomJS()
+    else:
+        driver = webdriver.Firefox(firefox_profile=webdriver.FirefoxProfile())
+    print('Done.', file=sys.stderr)
     driver.get(login_url)
 
     time.sleep(5)
