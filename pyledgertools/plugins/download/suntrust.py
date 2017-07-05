@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -90,10 +91,15 @@ class SuntrustScraper(IPlugin):
         pswd = config['webpswd']
         self.logger.debug('Loading webdriver.')
 
-        if config.get('browser', None) == 'PhantomJS':
-            driver = webdriver.PhantomJS()
-        else:
-            driver = webdriver.Firefox()
+        try:
+            if config.get('browser', None) == 'PhantomJS':
+                driver = webdriver.PhantomJS()
+            else:
+                driver = webdriver.Firefox()
+        except WebDriverException:
+            self.logger.debug('Error loading WebDriver', exc_info=True)
+            raise WebDriverException()
+
         self.logger.debug('Done.')
         driver.get(login_url)
 
