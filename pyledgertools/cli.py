@@ -16,7 +16,7 @@ from pyledgertools.strings import UI, Info, Prompts
 from pyledgertools.functions import amount_group
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
-
+HOME = expanduser("~")
 
 def get_args():
     """Build CLI arguments list."""
@@ -82,10 +82,17 @@ def get_plugin(manager, name):
 def read_ledger(journal=None):
     """Read a ledger journal and return fuuidsormatted transactions."""
 
+    # Ignore opening balances and limit transactions to the
+    # past 12 months.
+    options = [
+        '--limit', 'payee!~/Opening Balance/',
+        '-p', 'from 12 months ago'
+    ]
+
     if journal is None:
-        cmd = ['ledger', 'print', '--limit', 'payee!~/Opening Balance/']
+        cmd = ['ledger', 'print'] + options
     else:
-        cmd = ['ledger', '-f', journal, 'print', '--limit', 'payee!~/Opening Balance/']
+        cmd = ['ledger', '-f', journal] + options
 
     process = Popen(cmd, stdout=PIPE)
     journal, err = process.communicate()
@@ -129,12 +136,14 @@ def automatic():
     """Run the command line interface without user input."""
 
     default_config = os.path.join(
-        expanduser("~"), '.config', 'ledgertools', 'ledgertools.yaml'
+        HOME, '.config', 'ledgertools', 'ledgertools.yaml'
     )
+
+    other_plugins = os.path.join(HOME, '.config', 'ledgertools', 'plugins')
 
     # Load Plugins
     manager = PluginManager()
-    manager.setPluginPlaces([os.path.join(DIR_PATH, 'plugins')])
+    manager.setPluginPlaces([os.path.join(DIR_PATH, 'plugins'), other_plugins])
     manager.collectPlugins()
 
     # Load classification plugins
@@ -193,193 +202,60 @@ def automatic():
         interactive_classifier = bayes.setup(journal_file=learning_file)
         rules = rule.build_rules(conf.get('rules_file', None))
 
-        print_count = 0
+        print_results = False
         str_out = ''
-        for transaction in transactions:
-            if transaction.uuid not in uuids:
-                uuids.append(transaction.uuid)
-                result = None
-                selected_account = None
 
-                text = transaction.payee
-                amount = transaction.postings[0].amount
-                currency = transaction.postings[0].currency
+        # Build generator for filtered transactions
+        filtered = (x for x in transactions if x.uuid not in uuids)
+        for transaction in filtered:
+            result = None
+            postings = []
 
-                found_rule = rule.find_matching_rule(rules, transaction)
+            text = transaction.payee
+            amount = transaction.postings[0].amount
+            currency = transaction.postings[0].currency
 
-                # Check for keys in rule
-                skip = found_rule.get('ignore', False)
-                process = found_rule.get('process', None)
-                allocations = found_rule.get('allocations', None)
+            found_rule = rule.find_matching_rule(rules, transaction)
 
-                if all(x in [False, None] for x in [skip, process, allocations]):
-                    result = interactive_classifier.classify(
-                        text + ' ' + amount_group(amount),
-                        method='bayes'
-                    )
-                    cleaned = [x for x in result if round(x[1], 10) > 0]
-                    if len(cleaned) > 0:
-                        result = cleaned
+            # Check for keys in rule
+            skip = found_rule.get('ignore', False)
+            process = found_rule.get('process', None)
 
-                print(transaction.to_string(), '\n', file=sys.stderr)
+            if skip is True:
+                continue
+            elif process:
+                for plug in process.keys():
+                    tmp_conf = config
+                    tmp_conf.update(**process[plug])
+                    plugin = get_plugin(manager, plug)
+                    transaction = plugin.process(transaction, tmp_conf)
 
-                if skip is True:
-                    print(Info.skip_deposit_side, file=sys.stderr)
-                    pass
-                elif result is None:
-                    selected_account = conf.get('to', 'Expenses:Unkown')
-                elif isinstance(result, list):
-                    selected_account = result[0][0]
+            else: # Use classifier
+                result = interactive_classifier.classify(
+                    text + ' ' + amount_group(amount),
+                    method='bayes'
+                )
+                result = [x for x in result if round(x[1], 10) > 0]
+                if len(result) > 0:
+                    posting = {
+                        'account': result[0][0],
+                    }
+                else:
+                    posting = {
+                        'account': conf.get('to', 'Expenses:Unkown')
+                    }
+                posting.update({'amount': amount * -1, 'currency': currency})
+                transaction.add(**posting)
 
-                if selected_account:
-                    print_count += 1
-                    interactive_classifier.update(
-                        text + ' ' + amount_group(amount),
-                        selected_account
-                    )
-                    transaction.add(selected_account, amount * -1, currency)
+            print_out = True
 
-                    str_out += "```\n" + transaction.to_string() + "\n```\n"
-                    with open(conf['ledger_file'], 'a') as outfile:
-                        print(transaction.to_string() + '\n', file=outfile)
+            print(transaction.to_string(), '\n', file=sys.stderr)
+            str_out += "```\n" + transaction.to_string() + "\n```\n"
+            with open(conf['ledger_file'], 'a') as outfile:
+                print(transaction.to_string() + '\n', file=outfile)
 
-                    selected_account = None
-        if print_count > 0:
+        if print_out:
             print('## Transactions for ' + account + '\n' + str_out, file=sys.stdout)
-
-def interactive():
-    """Run the command line interface."""
-
-    default_config = os.path.join(
-        expanduser("~"), '.config', 'ledgertools', 'ledgertools.yaml'
-    )
-
-    # Load Plugins
-    manager = PluginManager()
-    manager.setPluginPlaces([os.path.join(DIR_PATH, 'plugins')])
-    manager.collectPlugins()
-
-    # Load classification plugins
-    rule = get_plugin(manager, 'Rule Based Classifier')
-    bayes = get_plugin(manager, 'Naive Bayes Classifier')
-
-    # Load command line options.
-    cli_options = get_args()
-
-    c_path = cli_options.get('config', default_config)
-
-    with open(c_path, 'r') as f:
-        config = yaml.load(f)
-
-    # -------------------------------------------------------------------------
-    # Start processing
-    # -------------------------------------------------------------------------
-    global_conf = config.get('global', {})
-
-    accounts = cli_options['account'].split(',')
-
-    for account in accounts:
-        base_conf = global_conf
-        conf = config.get(account, None)
-        parent_conf = config.get(conf.get('parent', 'NaN'), {})
-
-        base_conf.update(parent_conf)
-        base_conf.update(conf)
-        base_conf.update(cli_options)
-        conf = base_conf
-
-        # Get downloader and parser plugins fromthe config.
-        getter = get_plugin(manager, conf['downloader'])
-        parser = get_plugin(manager, conf['parser'])
-
-        file_path = conf.get('input_file', None)
-        try:
-            if not file_path:
-                file_path = getter.download(conf)
-        except:
-            continue
-
-        balances, transactions = parser.build_journal(file_path, conf)
-
-        transactions.sort(key=lambda x: x.date)
-
-        learning_file = conf.get('journal_file', read_ledger())
-        interactive_classifier = bayes.setup(journal_file=learning_file)
-        rules = rule.build_rules(conf.get('rules_file', None))
-        uuids = list_uuids()
-
-        for transaction in transactions:
-            if transaction.uuid not in uuids:
-                result = None
-                selected_account = None
-
-                text = transaction.payee
-                amount = transaction.postings[0].amount
-                currency = transaction.postings[0].currency
-
-                found_rule = rule.find_matching_rule(rules, transaction)
-
-                # Check for keys in rule
-                skip = found_rule.get('ignore', False)
-                process = found_rule.get('process', None)
-                allocations = found_rule.get('allocations', None)
-
-                if all(x in [False, None] for x in [skip, process, allocations]):
-                    result = interactive_classifier.classify(
-                        text + ' ' + amount_group(amount),
-                        method='bayes'
-                    )
-                    cleaned = [x for x in result if round(x[1], 10) > 0]
-                    if len(cleaned) > 0:
-                        result = cleaned
-
-                print('\n', UI.double_line)
-                print(transaction.to_string(), '\n')
-
-                if skip is True:
-                    print(Info.skip_deposit_side)
-                    pass
-                elif result is None:
-                    print(Prompts.needs_manual_entry)
-                    selected_account = input(': ')
-                    print('')
-                elif isinstance(result, list) and len(result) == 1:
-                    selected_account = result[0][0]
-                elif isinstance(result, list):
-                    for i, acc in enumerate(result[:5]):
-                        print(Prompts.bayes_result.format(i, acc))
-                    print(Prompts.opt_enter)
-                    print(Prompts.opt_skip)
-
-                    user_in = input(Prompts.enter_select).strip()
-
-                    try:
-                        selection = int(user_in)
-                        selected_account = result[selection][0]
-
-                    except ValueError:
-                        if user_in == Prompts.opt_e_key:
-                            selected_account = vim_input(
-                                Info.vim_helper.format(text, currency, amount),
-                                offset=4
-                            )
-                            selected_account = selected_account.strip()
-
-                if selected_account:
-                    interactive_classifier.update(
-                        text + ' ' + amount_group(amount),
-                        selected_account
-                    )
-                    transaction.add(selected_account, amount * -1, currency)
-
-                    print('\n', UI.single_line)
-                    print(transaction.to_string())
-                    with open(conf['ledger_file'], 'a') as outfile:
-                        print(transaction.to_string() + '\n', file=outfile)
-
-                    selected_account = None
-
-                print('\n', UI.double_line)
 
 
 if __name__ == "__main__":
