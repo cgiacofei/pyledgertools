@@ -12,6 +12,8 @@ import json
 from yapsy.IPlugin import IPlugin
 import time
 import sys
+import logging
+import logging.config
 
 
 def extract_from_row(row):
@@ -120,6 +122,10 @@ class SuntrustScraper(IPlugin):
             str:
                 Path to csv file containing scraped info.
         """
+        logging.config.dictConfig(config.get('logging', None))
+        print(config.get('logging'), file=sys.stderr)
+        self.logger = logging.getLogger(__name__)
+
         save_file = '/tmp/suntrust_scrape.json'
         start = config['dtstart']
         end = config['dtend']
