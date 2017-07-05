@@ -1,0 +1,8 @@
+[Core]
+Name = mortgage_process
+Module = mortgage
+
+[Documentation]
+Author = Chris Giacofei
+Version = 0.1
+Description = Generate mortgage payment from scehdule.
