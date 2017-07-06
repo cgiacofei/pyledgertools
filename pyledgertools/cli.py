@@ -230,12 +230,10 @@ def automatic():
                 continue
             elif process:
                 for plug in process.keys():
-                    tmp_conf = config
-                    tmp_conf.update(**process[plug])
                     logger.info('Use plugin: {}'.format(plug))
                     logger.debug(process[plug])
                     plugin = get_plugin(manager, plug)
-                    transaction = plugin.process(transaction, tmp_conf)
+                    transaction = plugin.process(transaction, conf, process[plug])
 
             else: # Use classifier
                 result = interactive_classifier.classify(
