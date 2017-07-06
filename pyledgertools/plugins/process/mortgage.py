@@ -3,12 +3,13 @@
 from datetime import datetime
 from yapsy.IPlugin import IPlugin
 import csv
-
-from pyledgertools.journal import Transaction, Posting
+import logging
+import logging.config
 
 now = datetime.now
 strftime = datetime.strftime
 strptime = datetime.strptime
+
 
 class AmortSchedule(IPlugin):
     """OFX file parsing."""
@@ -20,24 +21,41 @@ class AmortSchedule(IPlugin):
             file: mortgage schedule csv file.
             <csv_column>: <ledger:account:name>
         """
-        date = transaction.date
+        self.config = config
 
+        logging.config.dictConfig(config.get('logging', None))
+        self.logger = logging.getLogger(__name__)
+
+        date = transaction.date
+        self.logger.info(
+            'Transaction date: {}'.format(strftime(date, '%Y-%m-%d'))
+        )
         schedule_csv = args.pop('file', None)
         currency = args.pop('currency', '$')
 
         with open(schedule_csv, 'r') as f:
             schedule = csv.DictReader(f)
-            row = min(list(schedule), key=lambda x: abs(strptime(x['date'], '%Y-%m-%d') - date))
+            row = min(
+                list(schedule),
+                key=lambda x: abs(strptime(x['date'], '%Y-%m-%d') - date)
+            )
+            self.logger.info('Selected amortization row. ' + str(row))
 
         running_sum = 0
         for column in args.keys():
             try:
                 transaction.add(args[column], row[column], currency)
-                sum += float(row[column])
+                running_sum += float(row[column])
+                self.logger.info(
+                    'Add posting: {} {}'.format(args[column], row[column])
+                )
             except KeyError:
                 # If column is not in csv file use the remaining total balance.
                 # This must happen last and only ONCE per transaction.
                 value = transaction.postings[0].amount - running_sum
                 transaction.add(args[column], value, currency)
+                self.logger.info(
+                    'Add posting: {} {}'.format(args[column], value)
+                )
 
         return transaction
