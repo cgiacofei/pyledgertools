@@ -11,6 +11,8 @@ import tempfile
 from subprocess import Popen, PIPE, call
 from yapsy.PluginManager import PluginManager
 import yaml
+import logging
+import logging.config
 
 from pyledgertools.strings import UI, Info, Prompts
 from pyledgertools.functions import amount_group
@@ -163,6 +165,9 @@ def automatic():
     # -------------------------------------------------------------------------
     global_conf = config.get('global', {})
 
+    logging.config.dictConfig(global_conf.get('logging', None))
+    logger = logging.getLogger(__name__)
+
     accounts = cli_options['account'].split(',')
 
     learning_global = read_ledger()
@@ -227,6 +232,8 @@ def automatic():
                 for plug in process.keys():
                     tmp_conf = config
                     tmp_conf.update(**process[plug])
+                    logger.info('Use plugin: {}'.format(plug))
+                    logger.debug(process[plug])
                     plugin = get_plugin(manager, plug)
                     transaction = plugin.process(transaction, tmp_conf)
 
