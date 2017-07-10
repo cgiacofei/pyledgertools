@@ -175,7 +175,9 @@ def automatic():
 
     for account in accounts:
         base_conf = global_conf
-        conf = config.get(account, None)
+        account_config = config.get('accounts', None)
+
+        conf = account_config.get(account, None)
         parent_conf = config.get(conf.get('parent', 'NaN'), {})
 
         base_conf.update(parent_conf)

@@ -10,7 +10,7 @@ def readme():
 
 setup(
     name='pyledgertools',
-    version='0.1',
+    version='0.2',
     description='Python based tools for ledger accounting.',
     long_description=readme(),
     classifiers=[
