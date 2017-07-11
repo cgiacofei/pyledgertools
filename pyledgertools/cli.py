@@ -167,6 +167,7 @@ def automatic():
 
     logging.config.dictConfig(global_conf.get('logging', None))
     logger = logging.getLogger(__name__)
+    logger.info('Process transactions started.')
 
     accounts = cli_options['account'].split(',')
 
@@ -174,11 +175,13 @@ def automatic():
     uuids = list_uuids(learning_global)
 
     for account in accounts:
+        logger.info('Processing ' + account)
+
         base_conf = global_conf
         account_config = config.get('accounts', None)
 
         conf = account_config.get(account, None)
-        parent_conf = config.get(conf.get('parent', 'NaN'), {})
+        parent_conf = account_config.get(conf.get('parent', 'NaN'), {})
 
         base_conf.update(parent_conf)
         base_conf.update(conf)
@@ -194,6 +197,7 @@ def automatic():
             if not file_path:
                 file_path = getter.download(conf)
         except:
+            logger.error('Error processing the account.')
             continue
 
         balances, transactions = parser.build_journal(file_path, conf)
