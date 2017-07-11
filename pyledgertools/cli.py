@@ -88,7 +88,8 @@ def read_ledger(journal=None):
     # past 12 months.
     options = [
         '--limit', 'payee!~/Opening Balance/',
-        '-p', 'from 12 months ago'
+        '-p', 'from 12 months ago',
+        '--raw'
     ]
 
     if journal is None:
