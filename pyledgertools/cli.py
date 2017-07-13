@@ -95,7 +95,7 @@ def read_ledger(journal=None):
     if journal is None:
         cmd = ['ledger', 'print'] + options
     else:
-        cmd = ['ledger', '-f', journal] + options
+        cmd = ['ledger', '-f', journal, 'print'] + options
 
     process = Popen(cmd, stdout=PIPE)
     journal, err = process.communicate()
@@ -172,8 +172,9 @@ def automatic():
 
     accounts = cli_options['account'].split(',')
 
-    learning_global = read_ledger()
-    uuids = list_uuids(learning_global)
+    learning_file = read_ledger()
+
+    uuids = list_uuids(learning_file)
 
     for account in accounts:
         logger.info('Processing ' + account)
@@ -204,12 +205,6 @@ def automatic():
         balances, transactions = parser.build_journal(file_path, conf)
 
         transactions.sort(key=lambda x: x.date)
-
-        journal_file = conf.get('journal_file', None)
-        if not journal_file:
-            learning_file = learning_global
-        else:
-            learning_file = read_ledger(journal_file)
 
         interactive_classifier = bayes.setup(journal_file=learning_file)
         rules = rule.build_rules(conf.get('rules_file', None))
@@ -271,4 +266,4 @@ def automatic():
 
 
 if __name__ == "__main__":
-    interactive()
+    automatic()
