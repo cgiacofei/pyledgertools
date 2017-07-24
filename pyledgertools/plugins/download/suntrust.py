@@ -22,6 +22,9 @@ def extract_from_row(row):
     strip_strings = [
         'ELECTRONIC/ACH DEBIT',
         'CHECK CARD PURCHASE',
+        'Description:',
+        'Withdrawals:',
+        'Deposits:',
     ]
 
     json_data = {}
@@ -32,9 +35,9 @@ def extract_from_row(row):
         raw_date = data[0]
         payee = data[1]
         for strip in strip_strings:
-            payee = payee.replace(strip, '')
+            data = [x.replace(strip, '') for x in data]
 
-        p_regex = '([-]*)\s*(\$)(\d+.\d+)'
+        p_regex = '(-?)\s*(\$)(\d+\.\d+)'
         d_regex = '.*(\d{2,2})/(\d{2,2})/(\d{4,4})'
         try:
             amount = data[2].replace(',', '')
