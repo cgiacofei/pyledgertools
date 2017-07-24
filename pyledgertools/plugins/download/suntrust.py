@@ -25,6 +25,7 @@ def extract_from_row(row):
         'Description:',
         'Withdrawals:',
         'Deposits:',
+        'Date:',
     ]
 
     json_data = {}
@@ -32,14 +33,14 @@ def extract_from_row(row):
 
     if cells:
         data = [x.text for x in cells if x.text != '']
-        raw_date = data[0]
-        payee = data[1]
         for strip in strip_strings:
             data = [x.replace(strip, '') for x in data]
 
         p_regex = '(-?)\s*(\$)(\d+\.\d+)'
         d_regex = '.*(\d{2,2})/(\d{2,2})/(\d{4,4})'
         try:
+            raw_date = data[0]
+            payee = data[1]
             amount = data[2].replace(',', '')
             neg, cur, amt = re.match(p_regex, amount).groups()
             m, d, y = re.match(d_regex, raw_date).groups()
