@@ -20,6 +20,26 @@ from pyledgertools.functions import amount_group
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 HOME = expanduser("~")
 
+HTML_TEMPLATE = """
+<html>
+<head>
+<style>
+pre code {{
+  background-color:#eee;
+  border:1px solid #999;
+  display:block;
+  padding:20px;
+  font-size:12px
+}}
+</style>
+</head>
+<body>
+{body}
+</body>
+</html>
+"""
+
+
 def get_args():
     """Build CLI arguments list."""
 
@@ -138,6 +158,7 @@ def vim_input(text='', offset=None):
 def automatic():
     """Run the command line interface without user input."""
 
+    msg_body = '<h1>New Transactions</h1>\n'
     default_config = os.path.join(
         HOME, '.config', 'ledgertools', 'ledgertools.yaml'
     )
@@ -257,12 +278,14 @@ def automatic():
             print_results = True
 
             print(transaction.to_string(), '\n', file=sys.stderr)
-            str_out += "```\n" + transaction.to_string() + "\n```\n"
+            str_out += "<pre><code>\n" + transaction.to_string() + "\n</code></pre>\n"
             with open(conf['ledger_file'], 'a') as outfile:
                 print(transaction.to_string() + '\n', file=outfile)
 
         if print_results:
-            print('## Transactions for ' + account + '\n' + str_out, file=sys.stdout)
+            msg_body += '<h2>Transactions for ' + account + '</h2>\n' + str_out
+
+    print(HTML_TEMPLATE.format(body=msg_body), file=sys.stdout)
 
 
 if __name__ == "__main__":
